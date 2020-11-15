@@ -39,8 +39,14 @@ describe('AppointmentsDayView', () => {
     container = document.createElement('div');
     today = new Date();
     appointments = [
-      { startsAt: today.setHours(12, 0) },
-      { startsAt: today.setHours(13, 0) }
+      {
+        startsAt: today.setHours(12, 0),
+        customer: { firstName: 'Ashley' }
+      },
+      {
+        startsAt: today.setHours(13, 0),
+        customer: { firstName: 'Jordan' }
+      }
     ];
   });
 
@@ -63,11 +69,23 @@ describe('AppointmentsDayView', () => {
   it('renders each appointment in an li', () => {
     render(<AppointmentsDayView appointments={appointments} />);
     expect(container.querySelectorAll('li')).toHaveLength(2);
-    expect(container.querySelectorAll('li')[0].textContent).toEqual(
-      '12:00'
+    expect(
+      container.querySelectorAll('li')[0].textContent
+    ).toEqual('12:00');
+    expect(
+      container.querySelectorAll('li')[1].textContent
+    ).toEqual('13:00');
+  });
+
+  it('initially shows a message saying there are not appointments today', () => {
+    render(<AppointmentsDayView appointments={[]} />);
+    expect(container.textContent).toMatch(
+      'There are no appointments scheduled for today.'
     );
-    expect(container.querySelectorAll('li')[1].textContent).toEqual(
-      '13:00'
-    );
+  });
+
+  it('selects the first appointment by default', () => {
+    render(<AppointmentsDayView appointments={appointments} />);
+    expect(container.textContent).toMatch('Ashley');
   });
 });
