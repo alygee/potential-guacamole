@@ -11,7 +11,7 @@
     "serve": "node dist/server/server.js",
     "relay": "relay-compiler --src ./src --schema ./src/schema.graphql --watchman false",
     "build:css": "tailwind build src/styles.css -o dist/styles.css",
-    "watch:css": "chokidar 'src/App.css' -c 'npm run build:css'"
+    "watch:css": "chokidar 'src/styles.css' -c 'npm run build:css'"
   },
   "repository": {
     "type": "git",
