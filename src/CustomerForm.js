@@ -11,47 +11,88 @@ export const CustomerForm = ({
     lastName,
     phoneNumber
   });
-  const handleChangeFirstName = ({ target }) =>
+  const handleChange = ({ target }) =>
     setCustomer(customer => ({
       ...customer,
-      firstName: target.value
-    }));
-  const handleChangeLastName = ({ target }) =>
-    setCustomer(customer => ({
-      ...customer,
-      lastName: target.value
-    }));
-  const handleChangePhoneNumber = ({ target }) =>
-    setCustomer(customer => ({
-      ...customer,
-      phoneNumber: target.value
+      [target.name]: target.value
     }));
   return (
-    <form id="customer" onSubmit={() => onSubmit(customer)}>
-      <label htmlFor="firstName">First name</label>
-      <input
-        type="text"
-        name="firstName"
-        id="firstName"
-        value={firstName}
-        onChange={handleChangeFirstName}
-      />
-      <label htmlFor="lastName">Last name</label>
-      <input
-        type="text"
-        name="lastName"
-        id="lastName"
-        value={lastName}
-        onChange={handleChangeLastName}
-      />
-      <label htmlFor="phoneNumber">Phone number</label>
-      <input
-        type="text"
-        name="phoneNumber"
-        id="phoneNumber"
-        value={phoneNumber}
-        onChange={handleChangePhoneNumber}
-      />
-    </form>
+    <div className="w-full max-w-sm container mx-auto pt-20">
+      <form
+        id="customer"
+        onSubmit={() => onSubmit(customer)}
+        className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <div className="md:flex md:items-center mb-6">
+          <div className="md:w-1/3">
+            <label
+              htmlFor="firstName"
+              className="block text-gray-700 text-sm font-bold mb-2">
+              First name
+            </label>
+          </div>
+          <div className="md:w-2/3">
+            <input
+              type="text"
+              name="firstName"
+              id="firstName"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              placeholder="First name"
+              value={firstName}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+        <div className="md:flex md:items-center mb-6">
+          <div className="md:w-1/3">
+            <label
+              htmlFor="lastName"
+              className="block text-gray-700 text-sm font-bold mb-2">
+              Last name
+            </label>
+          </div>
+          <div className="md:w-2/3">
+            <input
+              type="text"
+              name="lastName"
+              id="lastName"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              placeholder="Last name"
+              value={lastName}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+        <div className="md:flex md:items-center mb-6">
+          <div className="md:w-1/3">
+            <label
+              htmlFor="phoneNumber"
+              className="block text-gray-700 text-sm font-bold mb-2">
+              Phone number
+            </label>
+          </div>
+          <div className="md:w-2/3">
+            <input
+              type="text"
+              name="phoneNumber"
+              id="phoneNumber"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              placeholder="Phone number"
+              value={phoneNumber}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+        <div className="md:flex md:items-center">
+          <div className="md:w-1/3"></div>
+          <div className="md:w-2/3">
+            <input
+              className="shadow bg-blue-500 hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
+              type="submit"
+              value="Add"
+            />
+          </div>
+        </div>
+      </form>
+    </div>
   );
 };
