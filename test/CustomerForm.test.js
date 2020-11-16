@@ -11,7 +11,7 @@ describe('CustomerForm', () => {
     expect(formElement.tagName).toEqual('INPUT');
     expect(formElement.type).toEqual('text');
   };
-  const field = () => form('customer').elements.firstName;
+  const field = name => form('customer').elements[name];
   const labelFor = formElement =>
     container.querySelector(`label[for="${formElement}"]`);
 
@@ -56,7 +56,7 @@ describe('CustomerForm', () => {
           }
         />
       );
-      await ReactTestUtils.Simulate.change(field(), {
+      await ReactTestUtils.Simulate.change(field(fieldName), {
         target: { value }
       });
       await ReactTestUtils.Simulate.submit(form('customer'));
@@ -82,5 +82,23 @@ describe('CustomerForm', () => {
     itAssignsAnIdThatMatchesTheLabelId('firstName');
     itSubmitExistingValue('firstName');
     itSubmitsNewValue('firstName', 'firstName');
+  });
+
+  describe('last name field', () => {
+    itRendersAsATextBox('lastName');
+    itIncludesTheExistingValue('lastName');
+    itRendersALabel('lastName', 'Last name');
+    itAssignsAnIdThatMatchesTheLabelId('lastName');
+    itSubmitExistingValue('lastName');
+    itSubmitsNewValue('lastName', 'lastName');
+  });
+
+  describe('phone number field', () => {
+    itRendersAsATextBox('phoneNumber');
+    itIncludesTheExistingValue('phoneNumber');
+    itRendersALabel('phoneNumber', 'Phone number');
+    itAssignsAnIdThatMatchesTheLabelId('phoneNumber');
+    itSubmitExistingValue('phoneNumber');
+    itSubmitsNewValue('phoneNumber', 'phoneNumber');
   });
 });
