@@ -11,7 +11,7 @@ describe('CustomerForm', () => {
     expect(formElement.tagName).toEqual('INPUT');
     expect(formElement.type).toEqual('text');
   };
-  const firstNameField = () => form('customer').elements.firstName;
+  const field = () => form('customer').elements.firstName;
   const labelFor = formElement =>
     container.querySelector(`label[for="${formElement}"]`);
 
@@ -24,55 +24,63 @@ describe('CustomerForm', () => {
     expect(form('customer')).not.toBeNull();
   });
 
-  it('renders the first name field as a text box', () => {
-    render(<CustomerForm />);
-    expectToBeInputFieldOfTypeText(firstNameField());
-  });
-
-  it('includes the existing value for the first name', () => {
-    render(<CustomerForm firstName="Ashley" />);
-    expect(firstNameField().value).toEqual('Ashley');
-  });
-
-  it('renders a label for the first name field', () => {
-    render(<CustomerForm />);
-    expect(labelFor('firstName')).not.toBeNull();
-    expect(labelFor('firstName').textContent).toEqual(
-      'First name'
-    );
-  });
-
-  it('assigns an id that matches the label id to the first name field', () => {
-    render(<CustomerForm />);
-    expect(firstNameField().id).toEqual('firstName');
-  });
-
-  it('saves existing first name when submitted', async () => {
-    expect.hasAssertions();
-    render(
-      <CustomerForm
-        firstName="Ashley"
-        onSubmit={({ firstName }) =>
-          expect(firstName).toEqual('Ashley')
-        }
-      />
-    );
-    await ReactTestUtils.Simulate.submit(form('customer'));
-  });
-
-  it('saves new first name when submitted', async () => {
-    expect.hasAssertions();
-    render(
-      <CustomerForm
-        firstName="Ashley"
-        onSubmit={({ firstName }) =>
-          expect(firstName).toEqual('Jamie')
-        }
-      />
-    );
-    await ReactTestUtils.Simulate.change(firstNameField(), {
-      target: { value: 'Jamie' }
+  const itRendersAsATextBox = fieldName =>
+    it('renders as a text box', () => {
+      render(<CustomerForm />);
+      expectToBeInputFieldOfTypeText(field(fieldName));
     });
-    await ReactTestUtils.Simulate.submit(form('customer'));
+  const itIncludesTheExistingValue = fieldName =>
+    it('includes the existing value', () => {
+      render(<CustomerForm {...{ [fieldName]: 'value' }} />);
+      expect(field(fieldName).value).toEqual('value');
+    });
+  const itRendersALabel = (fieldName, label) =>
+    it('renders a label', () => {
+      render(<CustomerForm />);
+      expect(labelFor(fieldName)).not.toBeNull();
+      expect(labelFor(fieldName).textContent).toEqual(label);
+    });
+  const itAssignsAnIdThatMatchesTheLabelId = fieldName =>
+    it('assigns an id that matches the label id', () => {
+      render(<CustomerForm />);
+      expect(field(fieldName).id).toEqual(fieldName);
+    });
+  const itSubmitsNewValue = (fieldName, value) =>
+    it('saves new value when submitted', async () => {
+      expect.hasAssertions();
+      render(
+        <CustomerForm
+          {...{ [fieldName]: 'existingValue' }}
+          onSubmit={props =>
+            expect(props[fieldName]).toEqual(value)
+          }
+        />
+      );
+      await ReactTestUtils.Simulate.change(field(), {
+        target: { value }
+      });
+      await ReactTestUtils.Simulate.submit(form('customer'));
+    });
+  const itSubmitExistingValue = fieldName =>
+    it('saves existing when submitted', async () => {
+      expect.hasAssertions();
+      render(
+        <CustomerForm
+          {...{ [fieldName]: 'existingValue' }}
+          onSubmit={props =>
+            expect(props[fieldName]).toEqual('existingValue')
+          }
+        />
+      );
+      await ReactTestUtils.Simulate.submit(form('customer'));
+    });
+
+  describe('first name field', () => {
+    itRendersAsATextBox('firstName');
+    itIncludesTheExistingValue('firstName');
+    itRendersALabel('firstName', 'First name');
+    itAssignsAnIdThatMatchesTheLabelId('firstName');
+    itSubmitExistingValue('firstName');
+    itSubmitsNewValue('firstName', 'firstName');
   });
 });
