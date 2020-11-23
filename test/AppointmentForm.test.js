@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactTestUtils from 'react-dom/test-utils';
 import { createContainer } from './domManipulators';
 import { AppointmentForm } from '../src/AppointmentForm';
 
@@ -60,6 +61,49 @@ describe('AppointmentForm', () => {
       );
       const option = findOption(field('service'), 'Blow-dry');
       expect(option.selected).toBeTruthy();
+    });
+
+    it('renders a label', () => {
+      render(<AppointmentForm />);
+      const label = container.querySelector(
+        'label[for="service"]'
+      );
+      expect(label).not.toBeNull();
+      expect(label.textContent).toEqual('Choose a service');
+    });
+
+    it('assigns an id that matches the label id', () => {
+      render(<AppointmentForm />);
+      expect(field('service').id).toEqual('service');
+    });
+
+    it('saves existing when submitted', async () => {
+      expect.hasAssertions();
+      render(
+        <AppointmentForm
+          service="Blow-dry"
+          onSubmit={({ service }) =>
+            expect(service).toEqual('Blow-dry')
+          }
+        />
+      );
+      await ReactTestUtils.Simulate.submit(form('appointment'));
+    });
+
+    it('saves new value when submitted', async () => {
+      expect.hasAssertions();
+      render(
+        <AppointmentForm
+          service="Blow-dry"
+          onSubmit={({ service }) =>
+            expect(service).toEqual('Cut & color')
+          }
+        />
+      );
+      await ReactTestUtils.Simulate.change(field('service'), {
+        target: { value: 'Cut & color' }
+      });
+      await ReactTestUtils.Simulate.submit(form('appointment'));
     });
   });
 });
