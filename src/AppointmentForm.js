@@ -116,10 +116,12 @@ export const AppointmentForm = ({
   salonOpensAt,
   salonClosesAt,
   today,
-  availableTimeSlots
+  availableTimeSlots,
+  startsAt
 }) => {
   const [appointment, setAppointment] = useState({
-    service
+    service,
+    startsAt
   });
   const handleChange = ({ target }) =>
     setAppointment(appointment => ({

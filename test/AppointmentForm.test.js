@@ -114,6 +114,12 @@ describe('AppointmentForm', () => {
     const startsAtField = index =>
       container.querySelectorAll(`input[name="startsAt"]`)[index];
 
+    const today = new Date();
+    const availableTimeSlots = [
+      { startsAt: today.setHours(9, 0, 0, 0) },
+      { startsAt: today.setHours(9, 30, 0, 0) }
+    ];
+
     it('renders a table for time slots', () => {
       render(<AppointmentForm />);
       expect(timeSlotTable()).not.toBeNull();
@@ -153,11 +159,6 @@ describe('AppointmentForm', () => {
     });
 
     it('renders a radio button for each time slot', () => {
-      const today = new Date();
-      const availableTimeSlots = [
-        { startsAt: today.setHours(9, 0, 0, 0) },
-        { startsAt: today.setHours(9, 30, 0, 0) }
-      ];
       render(
         <AppointmentForm
           availableTimeSlots={availableTimeSlots}
@@ -179,12 +180,7 @@ describe('AppointmentForm', () => {
       expect(timesOfDay).toHaveLength(0);
     });
 
-    it('sets radio button values to the index of the corresponding appointment', () => {
-      const today = new Date();
-      const availableTimeSlots = [
-        { startsAt: today.setHours(9, 0, 0, 0) },
-        { startsAt: today.setHours(9, 30, 0, 0) }
-      ];
+    it('sets radio button values to the startsAt of the corresponding appointment', () => {
       render(
         <AppointmentForm
           availableTimeSlots={availableTimeSlots}
@@ -199,31 +195,28 @@ describe('AppointmentForm', () => {
       );
     });
 
-    it.skip('assigns an id that matches the label id', () => {
-      render(<AppointmentForm />);
-      expect(field('service').id).toEqual('service');
-    });
-
-    it('saves existing when submitted', async () => {
-      expect.hasAssertions();
+    it('pre-selects the existing value', () => {
       render(
         <AppointmentForm
-          service="Blow-dry"
-          onSubmit={({ service }) =>
-            expect(service).toEqual('Blow-dry')
-          }
+          availableTimeSlots={availableTimeSlots}
+          today={today}
+          startsAt={availableTimeSlots[0].startsAt}
         />
       );
-      await ReactTestUtils.Simulate.submit(form('appointment'));
+      expect(startsAtField(0).checked).toEqual(true);
     });
 
-    it.skip('saves existing when submitted', async () => {
+    it('saves existing value when submitted', async () => {
       expect.hasAssertions();
       render(
         <AppointmentForm
-          service="Blow-dry"
-          onSubmit={({ service }) =>
-            expect(service).toEqual('Blow-dry')
+          availableTimeSlots={availableTimeSlots}
+          today={today}
+          startsAt={availableTimeSlots[0].startsAt}
+          onSubmit={({ startsAt }) =>
+            expect(startsAt).toEqual(
+              availableTimeSlots[0].startsAt
+            )
           }
         />
       );
