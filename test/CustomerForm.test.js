@@ -67,37 +67,41 @@ describe('CustomerForm', () => {
       expect(field(fieldName).id).toEqual(fieldName);
     });
 
-  const itSubmitsNewValue = (fieldName, value) =>
-    it('saves new value when submitted', async () => {
-      expect.hasAssertions();
+  const itSubmitsNewValue = fieldName =>
+    it('saves new value when submitted', () => {
+      const fetchSpy = spy();
+
       render(
         <CustomerForm
           {...{ [fieldName]: 'existingValue' }}
-          onSubmit={props =>
-            expect(props[fieldName]).toEqual(value)
-          }
+          fetch={fetchSpy.fn}
         />
       );
-      await ReactTestUtils.Simulate.change(field(fieldName), {
-        target: { value, name: fieldName }
+      ReactTestUtils.Simulate.change(field(fieldName), {
+        target: { value: 'newValue', name: fieldName }
       });
-      await ReactTestUtils.Simulate.submit(form('customer'));
+      ReactTestUtils.Simulate.submit(form('customer'));
+
+      const fetchOpts = fetchSpy.receivedArgument(1);
+      expect(JSON.parse(fetchOpts.body)[fieldName]).toEqual(
+        'newValue'
+      );
     });
 
   const itSubmitExistingValue = fieldName =>
     it('saves existing when submitted', () => {
-      let submitSpy = spy();
+      let fetchSpy = spy();
 
       render(
         <CustomerForm
           {...{ [fieldName]: 'value' }}
-          onSubmit={submitSpy.fn}
+          fetch={fetchSpy.fn}
         />
       );
       ReactTestUtils.Simulate.submit(form('customer'));
 
-      expect(submitSpy).toHaveBeenCalled();
-      expect(submitSpy.receivedArgument(0)[fieldName]).toEqual(
+      const fetchOpts = fetchSpy.receivedArgument(1);
+      expect(JSON.parse(fetchOpts.body)[fieldName]).toEqual(
         'value'
       );
     });
@@ -108,7 +112,7 @@ describe('CustomerForm', () => {
     itRendersALabel('firstName', 'First name');
     itAssignsAnIdThatMatchesTheLabelId('firstName');
     itSubmitExistingValue('firstName');
-    itSubmitsNewValue('firstName', 'firstName');
+    itSubmitsNewValue('firstName');
   });
 
   describe('last name field', () => {
@@ -117,7 +121,7 @@ describe('CustomerForm', () => {
     itRendersALabel('lastName', 'Last name');
     itAssignsAnIdThatMatchesTheLabelId('lastName');
     itSubmitExistingValue('lastName');
-    itSubmitsNewValue('lastName', 'lastName');
+    itSubmitsNewValue('lastName');
   });
 
   describe('phone number field', () => {
@@ -126,7 +130,7 @@ describe('CustomerForm', () => {
     itRendersALabel('phoneNumber', 'Phone number');
     itAssignsAnIdThatMatchesTheLabelId('phoneNumber');
     itSubmitExistingValue('phoneNumber');
-    itSubmitsNewValue('phoneNumber', 'phoneNumber');
+    itSubmitsNewValue('phoneNumber');
   });
 
   it('has a submit button', () => {
@@ -135,5 +139,20 @@ describe('CustomerForm', () => {
       'input[type="submit"]'
     );
     expect(submitButton).not.toBeNull();
+  });
+
+  it('calls fetch with the right properties when submitting data', async () => {
+    const fetchSpy = spy();
+    render(<CustomerForm fetch={fetchSpy.fn} />);
+    ReactTestUtils.Simulate.submit(form('customer'));
+    expect(fetchSpy).toHaveBeenCalled();
+    expect(fetchSpy.receivedArgument(0)).toEqual('/customers');
+
+    const fetchOpts = fetchSpy.receivedArgument(1);
+    expect(fetchOpts.method).toEqual('POST');
+    expect(fetchOpts.credentials).toEqual('same-origin');
+    expect(fetchOpts.headers).toEqual({
+      'Content-Type': 'application/json'
+    });
   });
 });
