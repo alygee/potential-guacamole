@@ -25,7 +25,8 @@ expect.extend({
 });
 
 describe('CustomerForm', () => {
-  let render, container;
+  let render, container, fetchSpy;
+  const originalFetch = window.fetch;
   const form = id => container.querySelector(`form[id="${id}"]`);
   const expectToBeInputFieldOfTypeText = formElement => {
     expect(formElement).not.toBeNull();
@@ -38,6 +39,12 @@ describe('CustomerForm', () => {
 
   beforeEach(() => {
     ({ render, container } = createContainer());
+    fetchSpy = spy();
+    window.fetch = fetchSpy.fn;
+  });
+
+  afterEach(() => {
+    window.fetch = originalFetch;
   });
 
   it('renders a form', () => {
@@ -69,8 +76,6 @@ describe('CustomerForm', () => {
 
   const itSubmitsNewValue = fieldName =>
     it('saves new value when submitted', () => {
-      const fetchSpy = spy();
-
       render(
         <CustomerForm
           {...{ [fieldName]: 'existingValue' }}
@@ -90,8 +95,6 @@ describe('CustomerForm', () => {
 
   const itSubmitExistingValue = fieldName =>
     it('saves existing when submitted', () => {
-      let fetchSpy = spy();
-
       render(
         <CustomerForm
           {...{ [fieldName]: 'value' }}
@@ -142,7 +145,6 @@ describe('CustomerForm', () => {
   });
 
   it('calls fetch with the right properties when submitting data', async () => {
-    const fetchSpy = spy();
     render(<CustomerForm fetch={fetchSpy.fn} />);
     ReactTestUtils.Simulate.submit(form('customer'));
     expect(fetchSpy).toHaveBeenCalled();
