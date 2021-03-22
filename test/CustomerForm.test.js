@@ -45,6 +45,7 @@ describe('CustomerForm', () => {
       render(<CustomerForm />);
       expect(field(fieldName).id).toEqual(fieldName);
     });
+
   const itSubmitsNewValue = (fieldName, value) =>
     it('saves new value when submitted', async () => {
       expect.hasAssertions();
@@ -74,6 +75,7 @@ describe('CustomerForm', () => {
       );
       ReactTestUtils.Simulate.submit(form('customer'));
 
+      expect(submitArg).toBeDefined();
       expect(submitArg[fieldName]).toEqual('value');
     });
 
