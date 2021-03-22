@@ -69,7 +69,7 @@ describe('AppointmentForm', () => {
         'label[for="service"]'
       );
       expect(label).not.toBeNull();
-      expect(label.textContent).toEqual('Choose a service');
+      expect(label.textContent).toEqual('Choose a service:');
     });
 
     it('assigns an id that matches the label id', () => {
