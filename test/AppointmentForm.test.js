@@ -255,5 +255,11 @@ describe('AppointmentForm', () => {
       });
       ReactTestUtils.Simulate.submit(form('appointment'));
     });
+
+    it('has a submit button', () => {
+      render(<AppointmentForm />);
+      const submitButton = container.querySelector('input[type=submit]');
+      expect(submitButton).not.toBeNull();
+    })
   });
 });

@@ -68,21 +68,27 @@ const TimeSlotTable = ({
   const timeSlots = dailyTimeSlots(salonOpensAt, salonClosesAt);
   const dates = weeklyDateValues(today);
   return (
-    <table id="time-slots">
+    <table id="time-slots" className="w-full">
       <thead>
         <tr>
-          <th />
+          <th className="border border-gray-200" />
           {dates.map(d => (
-            <th key={d}>{toShortDate(d)}</th>
+            <th className="border border-gray-200" key={d}>
+              {toShortDate(d)}
+            </th>
           ))}
         </tr>
       </thead>
       <tbody>
         {timeSlots.map(timeSlot => (
           <tr key={timeSlot}>
-            <th>{toTimeValue(timeSlot)}</th>
+            <th className="border border-gray-200">
+              {toTimeValue(timeSlot)}
+            </th>
             {dates.map(date => (
-              <td key={date}>
+              <td
+                key={date}
+                className="border border-gray-200 text-center">
                 <RadioButtonIfAvailable
                   availableTimeSlots={availableTimeSlots}
                   date={date}
@@ -138,18 +144,28 @@ export const AppointmentForm = ({
   );
 
   return (
-    <form id="appointment" onSubmit={() => onSubmit(appointment)}>
-      <label htmlFor="service">Choose a service</label>
-      <select
-        name="service"
-        id="service"
-        value={service}
-        onChange={handleChange}>
-        <option />
-        {selectableServices.map(s => (
-          <option key={s}>{s}</option>
-        ))}
-      </select>
+    <form
+      id="appointment"
+      onSubmit={() => onSubmit(appointment)}
+      className="flex flex-col">
+      <div className="flex justify-between align-center my-2">
+        <label
+          htmlFor="service"
+          className="text-lg self-center w-1/2 text-right mr-8">
+          Choose a service:
+        </label>
+        <select
+          name="service"
+          id="service"
+          value={service}
+          onChange={handleChange}
+          className="px-4 py-3 block w-1/2 my-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+          <option />
+          {selectableServices.map(s => (
+            <option key={s}>{s}</option>
+          ))}
+        </select>
+      </div>
       <TimeSlotTable
         salonOpensAt={salonOpensAt}
         salonClosesAt={salonClosesAt}
@@ -157,6 +173,11 @@ export const AppointmentForm = ({
         availableTimeSlots={availableTimeSlots}
         checkedTimeSlot={appointment.startsAt}
         handleChange={handleStartsAtChange}
+      />
+      <input
+        type="submit"
+        value="add"
+        className="shadow bg-blue-500 hover:bg-blue-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded my-4 w-1/2 self-end"
       />
     </form>
   );

@@ -23,6 +23,7 @@
     "@babel/plugin-transform-runtime": "^7.3.4",
     "@babel/preset-env": "^7.3.4",
     "@babel/preset-react": "^7.0.0",
+    "autoprefixer": "^10.2.5",
     "babel-loader": "^8.0.5",
     "babel-plugin-relay": "^3.0.0",
     "chokidar-cli": "^2.1.0",
@@ -32,19 +33,24 @@
     "faker": "^4.1.0",
     "jest": "^24.1.0",
     "jest-raw-loader": "^1.0.1",
+    "postcss": "^8.2.8",
     "react-test-renderer": "^16.9.0-alpha.0",
-    "relay-compiler": "^3.0.0",
+    "relay-compiler": "^11.0.0",
+    "resolve-dir": "^1.0.1",
     "supertest": "^3.4.2",
+    "tailwindcss": "^2.0.4",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.2.3",
     "webpack-node-externals": "^1.7.2"
   },
   "jest": {
-    "testPathIgnorePatterns": ["/node_modules/", "/server/"]
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/server/"
+    ]
   },
   "dependencies": {
     "@babel/runtime": "^7.3.4",
-    "autoprefixer": "^10.0.2",
     "express": "^4.16.4",
     "graphql": "^14.1.1",
     "morgan": "^1.9.1",
@@ -53,11 +59,10 @@
     "react": "^16.9.0-alpha.0",
     "react-dom": "^16.9.0-alpha.0",
     "react-redux": "^7.0.2",
-    "react-relay": "^3.0.0",
+    "react-relay": "^11.0.0",
     "react-router-dom": "^5.0.0",
     "redux": "^4.0.1",
     "redux-saga": "^1.0.2",
-    "tailwindcss": "^1.9.6",
     "whatwg-fetch": "^3.0.0"
   },
   "prettier": {
