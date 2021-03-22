@@ -3,6 +3,15 @@ import ReactTestUtils from 'react-dom/test-utils';
 import { createContainer } from './domManipulators';
 import { CustomerForm } from '../src/CustomerForm';
 
+const spy = () => {
+  let receivedArguments;
+  return {
+    fn: (...args) => (receivedArguments = args),
+    receivedArguments: () => receivedArguments,
+    receivedArgument: n => receivedArguments[n]
+  };
+};
+
 describe('CustomerForm', () => {
   let render, container;
   const form = id => container.querySelector(`form[id="${id}"]`);
@@ -65,18 +74,20 @@ describe('CustomerForm', () => {
 
   const itSubmitExistingValue = fieldName =>
     it('saves existing when submitted', () => {
-      let submitArg;
+      let submitSpy = spy();
 
       render(
         <CustomerForm
           {...{ [fieldName]: 'value' }}
-          onSubmit={customer => (submitArg = customer)}
+          onSubmit={submitSpy.fn}
         />
       );
       ReactTestUtils.Simulate.submit(form('customer'));
 
-      expect(submitArg).toBeDefined();
-      expect(submitArg[fieldName]).toEqual('value');
+      expect(submitSpy.receivedArguments()).toBeDefined();
+      expect(submitSpy.receivedArgument(0)[fieldName]).toEqual(
+        'value'
+      );
     });
 
   describe('first name field', () => {
