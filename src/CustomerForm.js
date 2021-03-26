@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 
+const Error = () => (
+  <div className="error">An error occurred during save.</div>
+);
+
 export const CustomerForm = ({
   firstName,
   lastName,
   phoneNumber,
   onSave
 }) => {
+  const [error, setError] = useState(false);
   const [customer, setCustomer] = useState({
     firstName,
     lastName,
@@ -28,6 +33,8 @@ export const CustomerForm = ({
     if (result.ok) {
       const customerWithId = await result.json();
       onSave(customerWithId);
+    } else {
+      setError(true);
     }
   };
   return (
@@ -36,6 +43,7 @@ export const CustomerForm = ({
         id="customer"
         onSubmit={handleSubmit}
         className="px-8 pt-6 pb-8 mb-4 bg-white rounded shadow-md">
+        { error ? <Error /> : null }
         <div className="mb-6 md:flex md:items-center">
           <div className="md:w-1/3">
             <label
