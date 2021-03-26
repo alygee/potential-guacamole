@@ -3,6 +3,11 @@ import React from 'react';
 import ReactTestUtils, { act } from 'react-dom/test-utils';
 import { createContainer } from './domManipulators';
 import { CustomerForm } from '../src/CustomerForm';
+import {
+  fetchResponseOk,
+  fetchResponseError,
+  requestBodyOf
+} from './spyHelpers';
 
 const spy = () => {
   let receivedArguments;
@@ -18,14 +23,6 @@ const spy = () => {
   };
 };
 
-const fetchResponseOk = body =>
-  Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve(body)
-  });
-
-const fetchResponseError = () => Promise.resolve({ ok: false });
-
 describe('CustomerForm', () => {
   const originalFetch = window.fetch;
   let render, container;
@@ -39,9 +36,6 @@ describe('CustomerForm', () => {
   const field = name => form('customer').elements[name];
   const labelFor = formElement =>
     container.querySelector(`label[for="${formElement}"]`);
-
-  const fetchRequestBody = () =>
-    JSON.parse(fetchSpy.mock.calls[0][1].body);
 
   beforeEach(() => {
     ({ render, container } = createContainer());
@@ -90,7 +84,7 @@ describe('CustomerForm', () => {
       });
       ReactTestUtils.Simulate.submit(form('customer'));
 
-      expect(fetchRequestBody()).toMatchObject({
+      expect(requestBodyOf(fetchSpy)).toMatchObject({
         [fieldName]: 'newValue'
       });
     });
@@ -101,7 +95,7 @@ describe('CustomerForm', () => {
 
       ReactTestUtils.Simulate.submit(form('customer'));
 
-      expect(fetchRequestBody()).toMatchObject({
+      expect(requestBodyOf(fetchSpy)).toMatchObject({
         [fieldName]: 'value'
       });
     });
