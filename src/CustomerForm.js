@@ -4,6 +4,7 @@ export const CustomerForm = ({
   firstName,
   lastName,
   phoneNumber,
+  onSave
 }) => {
   const [customer, setCustomer] = useState({
     firstName,
@@ -15,25 +16,31 @@ export const CustomerForm = ({
       ...customer,
       [target.name]: target.value
     }));
-  const handleSubmit = () => {
-    window.fetch('/customers', {
+  const handleSubmit = async e => {
+    e.preventDefault();
+
+    const result = await window.fetch('/customers', {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(customer)
     });
+    if (result.ok) {
+      const customerWithId = await result.json();
+      onSave(customerWithId);
+    }
   };
   return (
-    <div className="w-full max-w-sm container mx-auto pt-20">
+    <div className="container w-full max-w-sm pt-20 mx-auto">
       <form
         id="customer"
         onSubmit={handleSubmit}
-        className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <div className="md:flex md:items-center mb-6">
+        className="px-8 pt-6 pb-8 mb-4 bg-white rounded shadow-md">
+        <div className="mb-6 md:flex md:items-center">
           <div className="md:w-1/3">
             <label
               htmlFor="firstName"
-              className="block text-gray-700 text-sm font-bold mb-2">
+              className="block mb-2 text-sm font-bold text-gray-700">
               First name
             </label>
           </div>
@@ -42,18 +49,18 @@ export const CustomerForm = ({
               type="text"
               name="firstName"
               id="firstName"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
               placeholder="First name"
               value={firstName}
               onChange={handleChange}
             />
           </div>
         </div>
-        <div className="md:flex md:items-center mb-6">
+        <div className="mb-6 md:flex md:items-center">
           <div className="md:w-1/3">
             <label
               htmlFor="lastName"
-              className="block text-gray-700 text-sm font-bold mb-2">
+              className="block mb-2 text-sm font-bold text-gray-700">
               Last name
             </label>
           </div>
@@ -62,18 +69,18 @@ export const CustomerForm = ({
               type="text"
               name="lastName"
               id="lastName"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
               placeholder="Last name"
               value={lastName}
               onChange={handleChange}
             />
           </div>
         </div>
-        <div className="md:flex md:items-center mb-6">
+        <div className="mb-6 md:flex md:items-center">
           <div className="md:w-1/3">
             <label
               htmlFor="phoneNumber"
-              className="block text-gray-700 text-sm font-bold mb-2">
+              className="block mb-2 text-sm font-bold text-gray-700">
               Phone number
             </label>
           </div>
@@ -82,7 +89,7 @@ export const CustomerForm = ({
               type="text"
               name="phoneNumber"
               id="phoneNumber"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
               placeholder="Phone number"
               value={phoneNumber}
               onChange={handleChange}
@@ -93,7 +100,7 @@ export const CustomerForm = ({
           <div className="md:w-1/3"></div>
           <div className="md:w-2/3">
             <input
-              className="shadow bg-blue-500 hover:bg-blue-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
+              className="px-4 py-2 font-bold text-white bg-blue-500 rounded shadow hover:bg-blue-400 focus:shadow-outline focus:outline-none"
               type="submit"
               value="Add"
             />
@@ -102,4 +109,8 @@ export const CustomerForm = ({
       </form>
     </div>
   );
+};
+
+CustomerForm.defaultProps = {
+  onSave: () => {}
 };
