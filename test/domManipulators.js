@@ -1,4 +1,9 @@
 import ReactDOM from 'react-dom';
+import ReactTestUtils, { act } from 'react-dom/test-utils';
+
+export const withEvent = (name, value) => ({
+  target: { name, value }
+});
 
 export const createContainer = () => {
   const container = document.createElement('div');
@@ -17,7 +22,20 @@ export const createContainer = () => {
     );
   };
 
+  const simulateEvent = eventName => (element, eventData) =>
+    ReactTestUtils.Simulate[eventName](element, eventData);
+  const simulateEventAndWait = eventName => async (
+    element,
+    eventData
+  ) =>
+    await act(async () =>
+      ReactTestUtils.Simulate[eventName](element, eventData)
+    );
+
   return {
+    click: simulateEvent('click'),
+    change: simulateEvent('change'),
+    submit: simulateEventAndWait('submit'),
     render: component => ReactDOM.render(component, container),
     container,
     element,
