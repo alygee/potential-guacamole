@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactTestUtils from 'react-dom/test-utils';
+import { createContainer } from './domManipulators';
 
 import {
   Appointment,
@@ -8,14 +9,12 @@ import {
 } from '../src/AppointmentsDayView';
 
 let customer;
-let container;
 
 describe('Appointment', () => {
-  const render = component =>
-    ReactDOM.render(component, container);
+  let render, container;
 
   beforeEach(() => {
-    container = document.createElement('div');
+    ({ render, container } = createContainer());
   });
 
   it('renders the customer first name', () => {
@@ -32,12 +31,12 @@ describe('Appointment', () => {
 });
 
 describe('AppointmentsDayView', () => {
-  let container;
   let today;
   let appointments;
+  let render, container, element, elements;
 
   beforeEach(() => {
-    container = document.createElement('div');
+    ({ render, container, element, elements } = createContainer());
     today = new Date();
     appointments = [
       {
@@ -51,31 +50,22 @@ describe('AppointmentsDayView', () => {
     ];
   });
 
-  const render = component =>
-    ReactDOM.render(component, container);
-
   it('renders a div with the right id', () => {
     render(<AppointmentsDayView appointments={[]} />);
-    expect(
-      container.querySelector('div#appointmentsDayView')
-    ).not.toBeNull();
+    expect(element('div#appointmentsDayView')).not.toBeNull();
   });
 
   it('renders multiple appointments in an ol element', () => {
     render(<AppointmentsDayView appointments={appointments} />);
-    expect(container.querySelector('ol')).not.toBeNull();
-    expect(container.querySelector('ol').children).toHaveLength(2);
+    expect(element('ol')).not.toBeNull();
+    expect(element('ol').children).toHaveLength(2);
   });
 
   it('renders each appointment in an li', () => {
     render(<AppointmentsDayView appointments={appointments} />);
-    expect(container.querySelectorAll('li')).toHaveLength(2);
-    expect(
-      container.querySelectorAll('li')[0].textContent
-    ).toEqual('12:00');
-    expect(
-      container.querySelectorAll('li')[1].textContent
-    ).toEqual('13:00');
+    expect(elements('li')).toHaveLength(2);
+    expect(elements('li')[0].textContent).toEqual('12:00');
+    expect(elements('li')[1].textContent).toEqual('13:00');
   });
 
   it('initially shows a message saying there are not appointments today', () => {
@@ -92,17 +82,13 @@ describe('AppointmentsDayView', () => {
 
   it('has a button element in each li', () => {
     render(<AppointmentsDayView appointments={appointments} />);
-    expect(container.querySelectorAll('li > button')).toHaveLength(
-      2
-    );
-    expect(
-      container.querySelectorAll('li > button')[0].type
-    ).toEqual('button');
+    expect(elements('li > button')).toHaveLength(2);
+    expect(elements('li > button')[0].type).toEqual('button');
   });
 
   it('renders another appointment when selected', () => {
     render(<AppointmentsDayView appointments={appointments} />);
-    const button = container.querySelectorAll('button')[1];
+    const button = elements('button')[1];
     ReactTestUtils.Simulate.click(button);
     expect(container.textContent).toMatch('Jordan');
   });

@@ -24,7 +24,7 @@ const spy = () => {
 };
 
 describe('CustomerForm', () => {
-  let render, container, form, field, labelFor, element;
+  let render, form, field, labelFor, element;
 
   const expectToBeInputFieldOfTypeText = formElement => {
     expect(formElement).not.toBeNull();
@@ -35,7 +35,6 @@ describe('CustomerForm', () => {
   beforeEach(() => {
     ({
       render,
-      container,
       form,
       field,
       labelFor,

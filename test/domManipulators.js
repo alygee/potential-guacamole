@@ -8,6 +8,14 @@ export const createContainer = () => {
   const labelFor = formElement =>
     container.querySelector(`label[for="${formElement}"]`);
   const element = selector => container.querySelector(selector);
+  const elements = selector =>
+    Array.from(container.querySelectorAll(selector));
+  const findOption = (dropdownNode, textContent) => {
+    const options = Array.from(dropdownNode.childNodes);
+    return options.find(
+      option => option.textContent === textContent
+    );
+  };
 
   return {
     render: component => ReactDOM.render(component, container),
@@ -15,6 +23,8 @@ export const createContainer = () => {
     element,
     form,
     field,
-    labelFor
+    labelFor,
+    findOption,
+    elements
   };
 };
