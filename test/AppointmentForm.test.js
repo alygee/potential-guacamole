@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactTestUtils from 'react-dom/test-utils';
 import { createContainer } from './domManipulators';
 import { AppointmentForm } from '../src/AppointmentForm';
 
@@ -10,7 +9,9 @@ describe('AppointmentForm', () => {
     labelFor,
     findOption,
     element,
-    elements;
+    elements,
+    submit,
+    change;
 
   beforeEach(() => {
     ({
@@ -20,7 +21,9 @@ describe('AppointmentForm', () => {
       labelFor,
       findOption,
       element,
-      elements
+      elements,
+      submit,
+      change
     } = createContainer());
   });
 
@@ -104,7 +107,7 @@ describe('AppointmentForm', () => {
           }
         />
       );
-      await ReactTestUtils.Simulate.submit(form('appointment'));
+      await submit(form('appointment'));
     });
 
     it('saves new value when submitted', async () => {
@@ -117,13 +120,10 @@ describe('AppointmentForm', () => {
           }
         />
       );
-      await ReactTestUtils.Simulate.change(
-        field('appointment', 'service'),
-        {
-          target: { value: 'Cut & color' }
-        }
-      );
-      await ReactTestUtils.Simulate.submit(form('appointment'));
+      change(field('appointment', 'service'), {
+        target: { value: 'Cut & color' }
+      });
+      await submit(form('appointment'));
     });
   });
 
@@ -238,7 +238,7 @@ describe('AppointmentForm', () => {
           }
         />
       );
-      await ReactTestUtils.Simulate.submit(form('appointment'));
+      await submit(form('appointment'));
     });
 
     it('saves new value when submitted', async () => {
@@ -265,13 +265,13 @@ describe('AppointmentForm', () => {
       );
 
       // act
-      ReactTestUtils.Simulate.change(startsAtField(1), {
+      change(startsAtField(1), {
         target: {
           value: availableTimeSlots[1].startsAt.toString(),
           name: 'startsAt'
         }
       });
-      ReactTestUtils.Simulate.submit(form('appointment'));
+      submit(form('appointment'));
     });
 
     it('has a submit button', () => {

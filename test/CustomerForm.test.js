@@ -171,7 +171,7 @@ describe('CustomerForm', () => {
   });
 
   it('renders error message when fetch call fails', async () => {
-    window.fetch.mockReturnValue(Promise.resolve({ ok: false }));
+    window.fetch.mockReturnValue(fetchResponseError());
 
     render(<CustomerForm />);
     await submit(form('customer'));
@@ -180,5 +180,17 @@ describe('CustomerForm', () => {
     expect(element('.error').textContent).toMatch(
       'An error occurred during save.'
     );
+  });
+
+  it('clears error message when fetch call succeeds', async () => {
+    // arrange
+    window.fetch.mockReturnValueOnce(fetchResponseError());
+    render(<CustomerForm />);
+
+    await submit(form('customer'));
+    expect(element('.error')).not.toBeNull();
+
+    await submit(form('customer'));
+    expect(element('.error')).toBeNull();
   });
 });
