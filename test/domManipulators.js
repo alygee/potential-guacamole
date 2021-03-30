@@ -36,7 +36,12 @@ export const createContainer = () => {
     click: simulateEvent('click'),
     change: simulateEvent('change'),
     submit: simulateEventAndWait('submit'),
-    render: component => ReactDOM.render(component, container),
+    render: component =>
+      act(() => {
+        ReactDOM.render(component, container);
+      }),
+    renderAndWait: async component =>
+      await act(async () => ReactDOM.render(component, container)),
     container,
     element,
     form,
