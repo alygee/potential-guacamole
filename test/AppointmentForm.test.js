@@ -9,6 +9,7 @@ import { createContainer, withEvent } from './domManipulators';
 import { AppointmentForm } from '../src/AppointmentForm';
 
 describe('AppointmentForm', () => {
+  const customer = { id: 123 };
   let render,
     form,
     field,
@@ -43,6 +44,91 @@ describe('AppointmentForm', () => {
   it('renders a form', () => {
     render(<AppointmentForm />);
     expect(form('appointment')).not.toBeNull();
+  });
+
+  it('has a submit button', () => {
+    render(<AppointmentForm />);
+    expect(element('input[type=submit]')).not.toBeNull();
+  });
+
+  it('calls fetch with the right properties when submitting data', async () => {
+    render(<AppointmentForm customer={customer} />);
+    await submit(form('appointment'));
+    expect(window.fetch).toHaveBeenCalledWith(
+      '/appointments',
+      expect.objectContaining({
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' }
+      })
+    );
+  });
+
+  it('notifies onSave when form is submitted', async () => {
+    const saveSpy = jest.fn();
+    render(
+      <AppointmentForm onSave={saveSpy} customer={customer} />
+    );
+
+    await submit(form('appointment'));
+
+    expect(saveSpy).toHaveBeenCalled();
+  });
+
+  it('does not notify onSave if the POST request return an error', async () => {
+    window.fetch.mockReturnValue(fetchResponseError());
+    const saveSpy = jest.fn();
+    render(
+      <AppointmentForm onSave={saveSpy} customer={customer} />
+    );
+
+    await submit(form('appointment'));
+
+    expect(saveSpy).not.toHaveBeenCalled();
+  });
+
+  it('prevents the default action when submitting the form', async () => {
+    const preventDefaultSpy = jest.fn();
+
+    render(<AppointmentForm customer={customer} />);
+    await submit(form('appointment'), {
+      preventDefault: preventDefaultSpy
+    });
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+  });
+
+  it('renders error message when fetch call fails', async () => {
+    window.fetch.mockReturnValue(fetchResponseError());
+    render(<AppointmentForm customer={customer} />);
+
+    await submit(form('appointment'));
+
+    expect(element('.error')).not.toBeNull();
+    expect(element('.error').textContent).toMatch(
+      'An error occurred during save.'
+    );
+  });
+
+  it('clears error message when fetch call succeeds', async () => {
+    window.fetch.mockReturnValueOnce(fetchResponseError());
+    window.fetch.mockReturnValue(fetchResponseOk());
+    render(<AppointmentForm customer={customer} />);
+
+    await submit(form('appointment'));
+    await submit(form('appointment'));
+
+    expect(element('.error')).toBeNull();
+  });
+
+  it('passes the customer id to fetch when submitting', async () => {
+    render(<AppointmentForm customer={customer} />);
+
+    await submit(form('appointment'));
+
+    expect(requestBodyOf(window.fetch)).toMatchObject({
+      customer: customer.id
+    });
   });
 
   const itSubmitsNewValue = (fieldName, props = {}) => {
@@ -84,8 +170,8 @@ describe('AppointmentForm', () => {
   };
 
   describe('service field', () => {
-    itSubmitsNewValue('service');
-    itSubmitsExistingValue('service');
+    itSubmitsNewValue('service', { customer });
+    itSubmitsExistingValue('service', { customer });
 
     it('renders as a select box', () => {
       render(<AppointmentForm />);
@@ -252,6 +338,7 @@ describe('AppointmentForm', () => {
     it('saves existing value when submitted', async () => {
       render(
         <AppointmentForm
+          customer={customer}
           availableTimeSlots={availableTimeSlots}
           today={today}
           startsAt={availableTimeSlots[0].startsAt}
@@ -272,6 +359,7 @@ describe('AppointmentForm', () => {
       ];
       render(
         <AppointmentForm
+          customer={customer}
           availableTimeSlots={availableTimeSlots}
           today={today}
           startsAt={availableTimeSlots[0].startsAt}
@@ -289,77 +377,6 @@ describe('AppointmentForm', () => {
       expect(requestBodyOf(window.fetch)).toMatchObject({
         startsAt: availableTimeSlots[1].startsAt
       });
-    });
-
-    it('has a submit button', () => {
-      render(<AppointmentForm />);
-      expect(element('input[type=submit]')).not.toBeNull();
-    });
-
-    it('calls fetch with the right properties when submitting data', async () => {
-      render(<AppointmentForm />);
-      await submit(form('appointment'));
-      expect(window.fetch).toHaveBeenCalledWith(
-        '/appointments',
-        expect.objectContaining({
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json' }
-        })
-      );
-    });
-
-    it('notifies onSave when form is submitted', async () => {
-      const saveSpy = jest.fn();
-      render(<AppointmentForm onSave={saveSpy} />);
-
-      await submit(form('appointment'));
-
-      expect(saveSpy).toHaveBeenCalled();
-    });
-
-    it('does not notify onSave if the POST request return an error', async () => {
-      window.fetch.mockReturnValue(fetchResponseError());
-      const saveSpy = jest.fn();
-      render(<AppointmentForm onSave={saveSpy} />);
-
-      await submit(form('appointment'));
-
-      expect(saveSpy).not.toHaveBeenCalled();
-    });
-
-    it('prevents the default action when submitting the form', async () => {
-      const preventDefaultSpy = jest.fn();
-
-      render(<AppointmentForm />);
-      await submit(form('appointment'), {
-        preventDefault: preventDefaultSpy
-      });
-
-      expect(preventDefaultSpy).toHaveBeenCalled();
-    });
-
-    it('renders error message when fetch call fails', async () => {
-      window.fetch.mockReturnValue(fetchResponseError());
-      render(<AppointmentForm />);
-
-      await submit(form('appointment'));
-
-      expect(element('.error')).not.toBeNull();
-      expect(element('.error').textContent).toMatch(
-        'An error occurred during save.'
-      );
-    });
-
-    it('clears error message when fetch call succeeds', async () => {
-      window.fetch.mockReturnValueOnce(fetchResponseError());
-      window.fetch.mockReturnValue(fetchResponseOk());
-      render(<AppointmentForm />)
-
-      await submit(form('appointment'));
-      await submit(form('appointment'));
-
-      expect(element('.error')).not.toBeNull();
     });
   });
 });
