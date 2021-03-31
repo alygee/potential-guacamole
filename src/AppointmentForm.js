@@ -88,7 +88,7 @@ const TimeSlotTable = ({
             {dates.map(date => (
               <td
                 key={date}
-                className="border border-gray-200 text-center">
+                className="text-center border border-gray-200">
                 <RadioButtonIfAvailable
                   availableTimeSlots={availableTimeSlots}
                   date={date}
@@ -118,7 +118,6 @@ const toShortDate = timestamp => {
 export const AppointmentForm = ({
   selectableServices,
   service,
-  onSubmit,
   salonOpensAt,
   salonClosesAt,
   today,
@@ -134,6 +133,7 @@ export const AppointmentForm = ({
       ...appointment,
       service: target.value
     }));
+
   const handleStartsAtChange = useCallback(
     ({ target: { value } }) => {
       setAppointment(appointment => ({
@@ -143,15 +143,25 @@ export const AppointmentForm = ({
     }
   );
 
+  const handleSubmit = async e => {
+    e.preventDefault();
+    const result = await window.fetch('/appointments', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(appointment)
+    })
+  };
+
   return (
     <form
       id="appointment"
-      onSubmit={() => onSubmit(appointment)}
+      onSubmit={handleSubmit}
       className="flex flex-col">
-      <div className="flex justify-between align-center my-2">
+      <div className="flex justify-between my-2 align-center">
         <label
           htmlFor="service"
-          className="text-lg self-center w-1/2 text-right mr-8">
+          className="self-center w-1/2 mr-8 text-lg text-right">
           Choose a service:
         </label>
         <select
@@ -159,7 +169,7 @@ export const AppointmentForm = ({
           id="service"
           value={service}
           onChange={handleChange}
-          className="px-4 py-3 block w-1/2 my-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+          className="block w-1/2 px-4 py-3 my-2 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
           <option />
           {selectableServices.map(s => (
             <option key={s}>{s}</option>
@@ -177,7 +187,7 @@ export const AppointmentForm = ({
       <input
         type="submit"
         value="add"
-        className="shadow bg-blue-500 hover:bg-blue-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded my-4 w-1/2 self-end"
+        className="self-end w-1/2 px-4 py-2 my-4 font-bold text-white bg-blue-500 rounded shadow hover:bg-blue-400 focus:shadow-outline focus:outline-none"
       />
     </form>
   );

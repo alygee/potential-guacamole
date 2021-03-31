@@ -1,5 +1,11 @@
 import React from 'react';
-import { createContainer } from './domManipulators';
+import 'whatwg-fetch';
+import {
+  fetchResponseOk,
+  fetchResponseError,
+  requestBodyOf
+} from './spyHelpers';
+import { createContainer, withEvent } from './domManipulators';
 import { AppointmentForm } from '../src/AppointmentForm';
 
 describe('AppointmentForm', () => {
@@ -25,6 +31,13 @@ describe('AppointmentForm', () => {
       submit,
       change
     } = createContainer());
+    jest
+      .spyOn(window, 'fetch')
+      .mockReturnValue(fetchResponseOk({}));
+  });
+
+  afterEach(() => {
+    window.fetch.mockRestore();
   });
 
   it('renders a form', () => {
@@ -32,7 +45,48 @@ describe('AppointmentForm', () => {
     expect(form('appointment')).not.toBeNull();
   });
 
+  const itSubmitsNewValue = (fieldName, props = {}) => {
+    it('saves new value when submitted', async () => {
+      render(
+        <AppointmentForm
+          {...props}
+          {...{ [fieldName]: 'existingValue' }}
+        />
+      );
+
+      change(
+        field('appointment', fieldName),
+        withEvent(fieldName, 'newValue')
+      );
+      await submit(form('appointment'));
+
+      expect(requestBodyOf(window.fetch)).toMatchObject({
+        [fieldName]: 'newValue'
+      });
+    });
+  };
+
+  const itSubmitsExistingValue = (fieldName, props = {}) => {
+    it('saves existing value when submitted', async () => {
+      render(
+        <AppointmentForm
+          {...props}
+          {...{ [fieldName]: 'value' }}
+        />
+      );
+
+      await submit(form('appointment'));
+
+      expect(requestBodyOf(window.fetch)).toMatchObject({
+        [fieldName]: 'value'
+      });
+    });
+  };
+
   describe('service field', () => {
+    itSubmitsNewValue('service');
+    itSubmitsExistingValue('service');
+
     it('renders as a select box', () => {
       render(<AppointmentForm />);
       expect(field('appointment', 'service')).not.toBeNull();
@@ -95,35 +149,6 @@ describe('AppointmentForm', () => {
       expect(field('appointment', 'service').id).toEqual(
         'service'
       );
-    });
-
-    it('saves existing when submitted', async () => {
-      expect.hasAssertions();
-      render(
-        <AppointmentForm
-          service="Blow-dry"
-          onSubmit={({ service }) =>
-            expect(service).toEqual('Blow-dry')
-          }
-        />
-      );
-      await submit(form('appointment'));
-    });
-
-    it('saves new value when submitted', async () => {
-      expect.hasAssertions();
-      render(
-        <AppointmentForm
-          service="Blow-dry"
-          onSubmit={({ service }) =>
-            expect(service).toEqual('Cut & color')
-          }
-        />
-      );
-      change(field('appointment', 'service'), {
-        target: { value: 'Cut & color' }
-      });
-      await submit(form('appointment'));
     });
   });
 
@@ -225,26 +250,21 @@ describe('AppointmentForm', () => {
     });
 
     it('saves existing value when submitted', async () => {
-      expect.hasAssertions();
       render(
         <AppointmentForm
           availableTimeSlots={availableTimeSlots}
           today={today}
           startsAt={availableTimeSlots[0].startsAt}
-          onSubmit={({ startsAt }) =>
-            expect(startsAt).toEqual(
-              availableTimeSlots[0].startsAt
-            )
-          }
         />
       );
       await submit(form('appointment'));
+
+      expect(requestBodyOf(window.fetch)).toMatchObject({
+        'startsAt': availableTimeSlots[0].startsAt
+      });
     });
 
     it('saves new value when submitted', async () => {
-      expect.hasAssertions();
-
-      // arrange
       const today = new Date();
       const availableTimeSlots = [
         { startsAt: today.setHours(9, 0, 0, 0) },
@@ -255,16 +275,9 @@ describe('AppointmentForm', () => {
           availableTimeSlots={availableTimeSlots}
           today={today}
           startsAt={availableTimeSlots[0].startsAt}
-          onSubmit={({ startsAt }) => {
-            // assert
-            expect(startsAt).toEqual(
-              availableTimeSlots[1].startsAt
-            );
-          }}
         />
       );
 
-      // act
       change(startsAtField(1), {
         target: {
           value: availableTimeSlots[1].startsAt.toString(),
@@ -272,11 +285,28 @@ describe('AppointmentForm', () => {
         }
       });
       submit(form('appointment'));
+
+      expect(requestBodyOf(window.fetch)).toMatchObject({
+        'startsAt': availableTimeSlots[1].startsAt
+      });
     });
 
     it('has a submit button', () => {
       render(<AppointmentForm />);
       expect(element('input[type=submit]')).not.toBeNull();
+    });
+
+    it('calls fetch with the right properties when submitting data', async () => {
+      render(<AppointmentForm />);
+      await submit(form('appointment'));
+      expect(window.fetch).toHaveBeenCalledWith(
+        '/appointments',
+        expect.objectContaining({
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' }
+        })
+      );
     });
   });
 });
