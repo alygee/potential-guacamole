@@ -122,7 +122,8 @@ export const AppointmentForm = ({
   salonClosesAt,
   today,
   availableTimeSlots,
-  startsAt
+  startsAt,
+  onSave
 }) => {
   const [appointment, setAppointment] = useState({
     service,
@@ -150,7 +151,11 @@ export const AppointmentForm = ({
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(appointment)
-    })
+    });
+
+    if (result.ok) {
+      onSave();
+    }
   };
 
   return (
@@ -204,5 +209,6 @@ AppointmentForm.defaultProps = {
     'Beard trim',
     'Cut & beard trim',
     'Extensions'
-  ]
+  ],
+  onSave: () => {}
 };

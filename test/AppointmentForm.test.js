@@ -308,5 +308,14 @@ describe('AppointmentForm', () => {
         })
       );
     });
+
+    it('notifies onSave when form is submitted', async () => {
+      const saveSpy = jest.fn();
+      render(<AppointmentForm onSave={saveSpy} />);
+
+      await submit(form('appointment'));
+
+      expect(saveSpy).toHaveBeenCalled();
+    });
   });
 });
