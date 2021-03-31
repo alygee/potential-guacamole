@@ -260,7 +260,7 @@ describe('AppointmentForm', () => {
       await submit(form('appointment'));
 
       expect(requestBodyOf(window.fetch)).toMatchObject({
-        'startsAt': availableTimeSlots[0].startsAt
+        startsAt: availableTimeSlots[0].startsAt
       });
     });
 
@@ -287,7 +287,7 @@ describe('AppointmentForm', () => {
       submit(form('appointment'));
 
       expect(requestBodyOf(window.fetch)).toMatchObject({
-        'startsAt': availableTimeSlots[1].startsAt
+        startsAt: availableTimeSlots[1].startsAt
       });
     });
 
@@ -316,6 +316,50 @@ describe('AppointmentForm', () => {
       await submit(form('appointment'));
 
       expect(saveSpy).toHaveBeenCalled();
+    });
+
+    it('does not notify onSave if the POST request return an error', async () => {
+      window.fetch.mockReturnValue(fetchResponseError());
+      const saveSpy = jest.fn();
+      render(<AppointmentForm onSave={saveSpy} />);
+
+      await submit(form('appointment'));
+
+      expect(saveSpy).not.toHaveBeenCalled();
+    });
+
+    it('prevents the default action when submitting the form', async () => {
+      const preventDefaultSpy = jest.fn();
+
+      render(<AppointmentForm />);
+      await submit(form('appointment'), {
+        preventDefault: preventDefaultSpy
+      });
+
+      expect(preventDefaultSpy).toHaveBeenCalled();
+    });
+
+    it('renders error message when fetch call fails', async () => {
+      window.fetch.mockReturnValue(fetchResponseError());
+      render(<AppointmentForm />);
+
+      await submit(form('appointment'));
+
+      expect(element('.error')).not.toBeNull();
+      expect(element('.error').textContent).toMatch(
+        'An error occurred during save.'
+      );
+    });
+
+    it('clears error message when fetch call succeeds', async () => {
+      window.fetch.mockReturnValueOnce(fetchResponseError());
+      window.fetch.mockReturnValue(fetchResponseOk());
+      render(<AppointmentForm />)
+
+      await submit(form('appointment'));
+      await submit(form('appointment'));
+
+      expect(element('.error')).not.toBeNull();
     });
   });
 });

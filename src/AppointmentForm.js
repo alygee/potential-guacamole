@@ -1,5 +1,9 @@
 import React, { useState, useCallback } from 'react';
 
+const Error = () => (
+  <div className="error">An error occurred during save.</div>
+);
+
 const dailyTimeSlots = (salonOpensAt, salonClosesAt) => {
   const totalSlots = (salonClosesAt - salonOpensAt) * 2;
   const startTime = new Date().setHours(salonOpensAt, 0, 0, 0);
@@ -129,6 +133,7 @@ export const AppointmentForm = ({
     service,
     startsAt
   });
+  const [error, setError] = useState(false);
   const handleChange = ({ target }) =>
     setAppointment(appointment => ({
       ...appointment,
@@ -155,6 +160,8 @@ export const AppointmentForm = ({
 
     if (result.ok) {
       onSave();
+    } else {
+      setError(true);
     }
   };
 
@@ -164,6 +171,7 @@ export const AppointmentForm = ({
       onSubmit={handleSubmit}
       className="flex flex-col">
       <div className="flex justify-between my-2 align-center">
+        {error ? <Error /> : null}
         <label
           htmlFor="service"
           className="self-center w-1/2 mr-8 text-lg text-right">
