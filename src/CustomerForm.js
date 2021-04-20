@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
 
+const match = (re, description) => value =>
+  !value.match(re) ? description : undefined;
+
+const list = (...validators) => value =>
+  validators.reduce(
+    (result, validator) => result || validator(value),
+    undefined
+  );
+
+const required = description => value =>
+  !value || value.trim() === '' ? description : undefined;
+
 const Error = () => (
   <div className="error">An error occurred during save.</div>
 );
@@ -16,6 +28,7 @@ export const CustomerForm = ({
     lastName,
     phoneNumber
   });
+  const [validationErrors, setValidationErrors] = useState({});
   const handleChange = ({ target }) =>
     setCustomer(customer => ({
       ...customer,
@@ -38,13 +51,45 @@ export const CustomerForm = ({
       setError(true);
     }
   };
+  const handleBlur = ({ target }) => {
+    const validators = {
+      firstName: required('First name is required'),
+      lastName: required('Last name is required'),
+      phoneNumber: list(
+        required('Phone number is required'),
+        match(
+          /^[0-9+()\- ]*$/,
+          'Only numbers, spaces and these symbols are allowed: ( ) + -'
+        )
+      )
+    };
+    const result = validators[target.name](target.value);
+    setValidationErrors({
+      ...validationErrors,
+      [target.name]: result
+    });
+  };
+
+  const hasError = fieldName =>
+    validationErrors[fieldName] !== undefined;
+
+  const renderError = fieldName => {
+    if (hasError(fieldName)) {
+      return (
+        <span className="error">
+          {validationErrors[fieldName]}
+        </span>
+      );
+    }
+  };
+
   return (
     <div className="container w-full max-w-sm pt-20 mx-auto">
       <form
         id="customer"
         onSubmit={handleSubmit}
         className="px-8 pt-6 pb-8 mb-4 bg-white rounded shadow-md">
-        { error ? <Error /> : null }
+        {error ? <Error /> : null}
         <div className="mb-6 md:flex md:items-center">
           <div className="md:w-1/3">
             <label
@@ -62,7 +107,9 @@ export const CustomerForm = ({
               placeholder="First name"
               value={firstName}
               onChange={handleChange}
+              onBlur={handleBlur}
             />
+            {renderError('firstName')}
           </div>
         </div>
         <div className="mb-6 md:flex md:items-center">
@@ -82,7 +129,9 @@ export const CustomerForm = ({
               placeholder="Last name"
               value={lastName}
               onChange={handleChange}
+              onBlur={handleBlur}
             />
+            {renderError('lastName')}
           </div>
         </div>
         <div className="mb-6 md:flex md:items-center">
@@ -102,7 +151,9 @@ export const CustomerForm = ({
               placeholder="Phone number"
               value={phoneNumber}
               onChange={handleChange}
+              onBlur={handleBlur}
             />
+            {renderError('phoneNumber')}
           </div>
         </div>
         <div className="md:flex md:items-center">

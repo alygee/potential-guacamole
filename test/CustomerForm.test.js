@@ -9,7 +9,7 @@ import {
 } from './spyHelpers';
 
 describe('CustomerForm', () => {
-  let render, form, field, labelFor, element, change, submit;
+  let render, form, field, labelFor, element, change, submit, blur;
 
   const expectToBeInputFieldOfTypeText = formElement => {
     expect(formElement).not.toBeNull();
@@ -25,7 +25,8 @@ describe('CustomerForm', () => {
       labelFor,
       element,
       change,
-      submit
+      submit,
+      blur
     } = createContainer());
     jest
       .spyOn(window, 'fetch')
@@ -191,6 +192,53 @@ describe('CustomerForm', () => {
     expect(element('.error')).not.toBeNull();
 
     await submit(form('customer'));
+    expect(element('.error')).toBeNull();
+  });
+
+  const itInvalidatesFieldWithValue = (
+    fieldName,
+    value,
+    description
+  ) => {
+    it(`displays error after blur when ${fieldName} field is '${value}'`, () => {
+      render(<CustomerForm />);
+
+      blur(
+        field('customer', fieldName),
+        withEvent(fieldName, value)
+      );
+
+      expect(element('.error')).not.toBeNull();
+      expect(element('.error').textContent).toMatch(description);
+    });
+  };
+
+  itInvalidatesFieldWithValue(
+    'firstName',
+    ' ',
+    'First name is required'
+  );
+
+  itInvalidatesFieldWithValue(
+    'lastName',
+    ' ',
+    'Last name is required'
+  );
+
+  itInvalidatesFieldWithValue(
+    'phoneNumber',
+    ' ',
+    'Phone number is required'
+  );
+
+  it('accepts standard phone number characters when validating', () => {
+    render(<CustomerForm />);
+
+    blur(
+      element("[name='phoneNumber']"),
+      withEvent('phoneNumber', '0123456789+()- ')
+    );
+
     expect(element('.error')).toBeNull();
   });
 });
