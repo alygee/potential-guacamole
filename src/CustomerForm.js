@@ -16,6 +16,30 @@ const Error = () => (
   <div className="error">An error occurred during save.</div>
 );
 
+const validators = {
+  firstName: required('First name is required'),
+  lastName: required('Last name is required'),
+  phoneNumber: list(
+    required('Phone number is required'),
+    match(
+      /^[0-9+()\- ]*$/,
+      'Only numbers, spaces and these symbols are allowed: ( ) + -'
+    )
+  )
+};
+
+const anyErrors = errors =>
+  Object.values(errors).some(error => error !== undefined);
+
+const validateMany = fields =>
+  Object.entries(fields).reduce(
+    (result, [name, value]) => ({
+      ...result,
+      [name]: validators[name](value)
+    }),
+    {}
+  );
+
 export const CustomerForm = ({
   firstName,
   lastName,
@@ -23,46 +47,46 @@ export const CustomerForm = ({
   onSave
 }) => {
   const [error, setError] = useState(false);
+
   const [customer, setCustomer] = useState({
     firstName,
     lastName,
     phoneNumber
   });
+
   const [validationErrors, setValidationErrors] = useState({});
+
   const handleChange = ({ target }) =>
     setCustomer(customer => ({
       ...customer,
       [target.name]: target.value
     }));
+
   const handleSubmit = async e => {
     e.preventDefault();
 
-    const result = await window.fetch('/customers', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(customer)
-    });
-    if (result.ok) {
-      setError(false);
-      const customerWithId = await result.json();
-      onSave(customerWithId);
+    const validationResult = validateMany(customer);
+
+    if (!anyErrors(validationResult)) {
+      const result = await window.fetch('/customers', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(customer)
+      });
+      if (result.ok) {
+        setError(false);
+        const customerWithId = await result.json();
+        onSave(customerWithId);
+      } else {
+        setError(true);
+      }
     } else {
-      setError(true);
+      setValidationErrors(validationResult);
     }
   };
+
   const handleBlur = ({ target }) => {
-    const validators = {
-      firstName: required('First name is required'),
-      lastName: required('Last name is required'),
-      phoneNumber: list(
-        required('Phone number is required'),
-        match(
-          /^[0-9+()\- ]*$/,
-          'Only numbers, spaces and these symbols are allowed: ( ) + -'
-        )
-      )
-    };
     const result = validators[target.name](target.value);
     setValidationErrors({
       ...validationErrors,

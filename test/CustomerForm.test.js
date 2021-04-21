@@ -17,6 +17,12 @@ describe('CustomerForm', () => {
     expect(formElement.type).toEqual('text');
   };
 
+  const validCustomer = {
+    firstName: 'first',
+    lastName: 'last',
+    phoneNumber: '123456789'
+  };
+
   beforeEach(() => {
     ({
       render,
@@ -66,29 +72,43 @@ describe('CustomerForm', () => {
     });
 
   const itSubmitsNewValue = fieldName =>
-    it('saves new value when submitted', () => {
+    it('saves new value when submitted', async () => {
+      const existingValue =
+        fieldName === 'phoneNumber' ? '123' : 'existingValue';
+      const newValue =
+        fieldName === 'phoneNumber' ? '456' : 'newValue';
       render(
-        <CustomerForm {...{ [fieldName]: 'existingValue' }} />
+        <CustomerForm
+          {...validCustomer}
+          {...{ [fieldName]: existingValue }}
+        />
       );
       change(
         field('customer', fieldName),
-        withEvent(fieldName, 'newValue')
+        withEvent(fieldName, newValue)
       );
-      submit(form('customer'));
+      await submit(form('customer'));
 
       expect(requestBodyOf(window.fetch)).toMatchObject({
-        [fieldName]: 'newValue'
+        [fieldName]: newValue
       });
     });
 
   const itSubmitExistingValue = fieldName =>
-    it('saves existing when submitted', () => {
-      render(<CustomerForm {...{ [fieldName]: 'value' }} />);
+    it('saves existing when submitted', async () => {
+      const existingValue =
+        fieldName === 'phoneNumber' ? '123' : 'value';
+      render(
+        <CustomerForm
+          {...validCustomer}
+          {...{ [fieldName]: existingValue }}
+        />
+      );
 
-      submit(form('customer'));
+      await submit(form('customer'));
 
       expect(requestBodyOf(window.fetch)).toMatchObject({
-        [fieldName]: 'value'
+        [fieldName]: existingValue
       });
     });
 
@@ -125,7 +145,7 @@ describe('CustomerForm', () => {
   });
 
   it('calls fetch with the right properties when submitting data', async () => {
-    render(<CustomerForm />);
+    render(<CustomerForm {...validCustomer} />);
 
     submit(form('customer'));
 
@@ -144,7 +164,7 @@ describe('CustomerForm', () => {
     window.fetch.mockReturnValue(fetchResponseOk(customer));
     const saveSpy = jest.fn();
 
-    render(<CustomerForm onSave={saveSpy} />);
+    render(<CustomerForm onSave={saveSpy} {...validCustomer} />);
     await submit(form('customer'));
 
     expect(saveSpy).toHaveBeenCalledWith(customer);
@@ -154,7 +174,7 @@ describe('CustomerForm', () => {
     window.fetch.mockReturnValue(fetchResponseError());
     const saveSpy = jest.fn();
 
-    render(<CustomerForm onSave={saveSpy} />);
+    render(<CustomerForm onSave={saveSpy} {...validCustomer} />);
     await submit(form('customer'));
 
     expect(saveSpy).not.toHaveBeenCalled();
@@ -163,7 +183,7 @@ describe('CustomerForm', () => {
   it('prevents the default action when submitting the form', async () => {
     const preventDefaultSpy = jest.fn();
 
-    render(<CustomerForm />);
+    render(<CustomerForm {...validCustomer} />);
     await submit(form('customer'), {
       preventDefault: preventDefaultSpy
     });
@@ -174,7 +194,7 @@ describe('CustomerForm', () => {
   it('renders error message when fetch call fails', async () => {
     window.fetch.mockReturnValue(fetchResponseError());
 
-    render(<CustomerForm />);
+    render(<CustomerForm {...validCustomer} />);
     await submit(form('customer'));
 
     expect(element('.error')).not.toBeNull();
@@ -186,7 +206,7 @@ describe('CustomerForm', () => {
   it('clears error message when fetch call succeeds', async () => {
     // arrange
     window.fetch.mockReturnValueOnce(fetchResponseError());
-    render(<CustomerForm />);
+    render(<CustomerForm {...validCustomer} />);
 
     await submit(form('customer'));
     expect(element('.error')).not.toBeNull();
@@ -240,5 +260,20 @@ describe('CustomerForm', () => {
     );
 
     expect(element('.error')).toBeNull();
+  });
+
+  it('does not submit the form when there are validation errors', async () => {
+    render(<CustomerForm />);
+
+    await submit(form('customer'));
+    expect(window.fetch).not.toHaveBeenCalled();
+  });
+
+  it('renders validation errors after submission fails', async () => {
+    render(<CustomerForm />);
+
+    await submit(form('customer'));
+    expect(window.fetch).not.toHaveBeenCalled();
+    expect(element('.error')).not.toBeNull();
   });
 });
