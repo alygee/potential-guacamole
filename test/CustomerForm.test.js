@@ -5,13 +5,13 @@ import { CustomerForm } from '../src/CustomerForm';
 import {
   fetchResponseOk,
   fetchResponseError,
-  requestBodyOf
+  requestBodyOf,
 } from './spyHelpers';
 
 describe('CustomerForm', () => {
   let render, form, field, labelFor, element, change, submit, blur;
 
-  const expectToBeInputFieldOfTypeText = formElement => {
+  const expectToBeInputFieldOfTypeText = (formElement) => {
     expect(formElement).not.toBeNull();
     expect(formElement.tagName).toEqual('INPUT');
     expect(formElement.type).toEqual('text');
@@ -20,7 +20,7 @@ describe('CustomerForm', () => {
   const validCustomer = {
     firstName: 'first',
     lastName: 'last',
-    phoneNumber: '123456789'
+    phoneNumber: '123456789',
   };
 
   beforeEach(() => {
@@ -32,7 +32,7 @@ describe('CustomerForm', () => {
       element,
       change,
       submit,
-      blur
+      blur,
     } = createContainer());
     jest
       .spyOn(window, 'fetch')
@@ -48,13 +48,13 @@ describe('CustomerForm', () => {
     expect(form('customer')).not.toBeNull();
   });
 
-  const itRendersAsATextBox = fieldName =>
+  const itRendersAsATextBox = (fieldName) =>
     it('renders as a text box', () => {
       render(<CustomerForm />);
       expectToBeInputFieldOfTypeText(field('customer', fieldName));
     });
 
-  const itIncludesTheExistingValue = fieldName =>
+  const itIncludesTheExistingValue = (fieldName) =>
     it('includes the existing value', () => {
       render(<CustomerForm {...{ [fieldName]: 'value' }} />);
       expect(field('customer', fieldName).value).toEqual('value');
@@ -65,13 +65,13 @@ describe('CustomerForm', () => {
       expect(labelFor(fieldName)).not.toBeNull();
       expect(labelFor(fieldName).textContent).toEqual(label);
     });
-  const itAssignsAnIdThatMatchesTheLabelId = fieldName =>
+  const itAssignsAnIdThatMatchesTheLabelId = (fieldName) =>
     it('assigns an id that matches the label id', () => {
       render(<CustomerForm />);
       expect(field('customer', fieldName).id).toEqual(fieldName);
     });
 
-  const itSubmitsNewValue = fieldName =>
+  const itSubmitsNewValue = (fieldName) =>
     it('saves new value when submitted', async () => {
       const existingValue =
         fieldName === 'phoneNumber' ? '123' : 'existingValue';
@@ -90,11 +90,11 @@ describe('CustomerForm', () => {
       await submit(form('customer'));
 
       expect(requestBodyOf(window.fetch)).toMatchObject({
-        [fieldName]: newValue
+        [fieldName]: newValue,
       });
     });
 
-  const itSubmitExistingValue = fieldName =>
+  const itSubmitExistingValue = (fieldName) =>
     it('saves existing when submitted', async () => {
       const existingValue =
         fieldName === 'phoneNumber' ? '123' : 'value';
@@ -108,7 +108,7 @@ describe('CustomerForm', () => {
       await submit(form('customer'));
 
       expect(requestBodyOf(window.fetch)).toMatchObject({
-        [fieldName]: existingValue
+        [fieldName]: existingValue,
       });
     });
 
@@ -154,8 +154,22 @@ describe('CustomerForm', () => {
       expect.objectContaining({
         method: 'POST',
         credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       })
+    );
+  });
+
+  it('renders field validation errors from server', async () => {
+    const errors = {
+      phoneNumber: 'Phone number already exists in the system',
+    };
+    window.fetch.mockReturnValue(
+      fetchResponseError(422, { errors })
+    );
+    render(<CustomerForm {...validCustomer} />);
+    await submit(form('customer'));
+    expect(element('.error').textContent).toMatch(
+      errors.phoneNumber
     );
   });
 
@@ -185,7 +199,7 @@ describe('CustomerForm', () => {
 
     render(<CustomerForm {...validCustomer} />);
     await submit(form('customer'), {
-      preventDefault: preventDefaultSpy
+      preventDefault: preventDefaultSpy,
     });
 
     expect(preventDefaultSpy).toHaveBeenCalled();
