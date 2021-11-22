@@ -37,6 +37,7 @@ export const createContainer = () => {
     blur: simulateEvent('blur'),
     change: simulateEvent('change'),
     submit: simulateEventAndWait('submit'),
+    clickAndWait: simulateEventAndWait('click'),
     render: component =>
       act(() => {
         ReactDOM.render(component, container);
