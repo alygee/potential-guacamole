@@ -1,4 +1,4 @@
-# This is the example application for the book _Mastering Test-Driven Development
+# This is the example application for the book _Mastering Test-Driven Development_
 
 # Prerequisities
 
