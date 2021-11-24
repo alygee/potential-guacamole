@@ -26,6 +26,10 @@ const SearchButtons = ({ handleNext, handlePrevious }) => (
 export const CustomerSearch = () => {
   const [customers, setCustomers] = useState([]);
   const [queryStrings, setQueryStrings] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearchTerm = ({ target: { value } }) =>
+    setSearchTerm(value);
 
   const handleNext = useCallback(async () => {
     const after = customers[customers.length - 1].id;
@@ -41,7 +45,14 @@ export const CustomerSearch = () => {
     const fetchData = async () => {
       let queryString = '';
 
-      if (queryStrings.length > 0) {
+      if (queryStrings.length > 0 && searchTerm !== '') {
+        queryString =
+          queryStrings[queryStrings.length - 1] +
+          '&searchTerm=' +
+          searchTerm;
+      } else if (searchTerm !== '') {
+        queryString = `?searchTerm=${searchTerm}`;
+      } else if (queryStrings.length > 0) {
         queryString = queryStrings[queryStrings.length - 1];
       }
 
@@ -57,10 +68,14 @@ export const CustomerSearch = () => {
     };
 
     fetchData();
-  }, [queryStrings]);
+  }, [queryStrings, searchTerm]);
 
   return (
     <React.Fragment>
+      <input
+        placeholder="Enter filter text"
+        onChange={handleSearchTerm}
+      />
       <SearchButtons
         handleNext={handleNext}
         handlePrevious={handlePrevious}

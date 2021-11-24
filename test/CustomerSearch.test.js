@@ -1,18 +1,23 @@
 import 'whatwg-fetch';
 import React from 'react';
-import { createContainer } from './domManipulators';
+import { createContainer, withEvent } from './domManipulators';
 import { CustomerSearch } from '../src/CustomerSearch';
 import { fetchResponseOk } from './spyHelpers';
 
 describe('CustomerSearch', () => {
-  let renderAndWait, elements, element, clickAndWait;
+  let renderAndWait,
+    elements,
+    element,
+    clickAndWait,
+    changeAndWait;
 
   beforeEach(() => {
     ({
       renderAndWait,
       elements,
       element,
-      clickAndWait
+      clickAndWait,
+      changeAndWait
     } = createContainer());
     jest
       .spyOn(window, 'fetch')
@@ -162,6 +167,44 @@ describe('CustomerSearch', () => {
 
     expect(window.fetch).toHaveBeenLastCalledWith(
       '/customers',
+      expect.anything()
+    );
+  });
+
+  it('has a search input field with a placeholder', async () => {
+    await renderAndWait(<CustomerSearch />);
+    expect(element('input')).not.toBeNull();
+    expect(element('input').getAttribute('placeholder')).toEqual(
+      'Enter filter text'
+    );
+  });
+
+  it('performs search when search term is changed', async () => {
+    await renderAndWait(<CustomerSearch />);
+
+    await changeAndWait(
+      element('input'),
+      withEvent('input', 'name')
+    );
+
+    expect(window.fetch).toHaveBeenLastCalledWith(
+      '/customers?searchTerm=name',
+      expect.anything()
+    );
+  });
+
+  it('includes search term when moving to next page', async () => {
+    window.fetch.mockReturnValue(fetchResponseOk(tenCustomers));
+    await renderAndWait(<CustomerSearch />);
+
+    await changeAndWait(
+      element('input'),
+      withEvent('input', 'name')
+    );
+    await clickAndWait(element('button#next-page'));
+
+    expect(window.fetch).toHaveBeenLastCalledWith(
+      '/customers?after=9&searchTerm=name',
       expect.anything()
     );
   });
