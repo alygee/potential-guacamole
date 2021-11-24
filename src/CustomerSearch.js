@@ -9,8 +9,14 @@ const CustomerRow = ({ customer }) => (
   </tr>
 );
 
-const SearchButtons = ({ handleNext }) => (
+const SearchButtons = ({ handleNext, handlePrevious }) => (
   <div className="button-bar">
+    <button
+      role="button"
+      id="previous-page"
+      onClick={handlePrevious}>
+      Previous
+    </button>
     <button role="button" id="next-page" onClick={handleNext}>
       Next
     </button>
@@ -19,16 +25,26 @@ const SearchButtons = ({ handleNext }) => (
 
 export const CustomerSearch = () => {
   const [customers, setCustomers] = useState([]);
-  const [queryString, setQueryString] = useState('');
+  const [queryStrings, setQueryStrings] = useState([]);
 
   const handleNext = useCallback(async () => {
     const after = customers[customers.length - 1].id;
-    const newQueryString = `?after=${after}`;
-    setQueryString(newQueryString);
-  }, [customers]);
+    const queryString = `?after=${after}`;
+    setQueryStrings([...queryStrings, queryString]);
+  }, [customers, queryStrings]);
+
+  const handlePrevious = useCallback(() => {
+    setQueryStrings(queryStrings.slice(0, -1));
+  }, [queryStrings]);
 
   useEffect(() => {
     const fetchData = async () => {
+      let queryString = '';
+
+      if (queryStrings.length > 0) {
+        queryString = queryStrings[queryStrings.length - 1];
+      }
+
       const result = await window.fetch(
         `/customers${queryString}`,
         {
@@ -41,11 +57,14 @@ export const CustomerSearch = () => {
     };
 
     fetchData();
-  }, [queryString]);
+  }, [queryStrings]);
 
   return (
     <React.Fragment>
-      <SearchButtons handleNext={handleNext} />
+      <SearchButtons
+        handleNext={handleNext}
+        handlePrevious={handlePrevious}
+      />
       <table>
         <thead>
           <tr>
