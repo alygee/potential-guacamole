@@ -3,24 +3,47 @@ import ReactDOM from 'react-dom';
 import { CustomerForm } from './CustomerForm';
 import { AppointmentFormLoader } from './AppointmentFormLoader';
 import { AppointmentsDayViewLoader } from './AppointmentsDayViewLoader';
+import { CustomerSearch } from './CustomerSearch';
 
 export const App = () => {
   const [view, setView] = useState('dayView');
+  const [customer, setCustomer] = useState();
+
   const transitionToAddCustomer = useCallback(
     () => setView('addCustomer'),
     []
   );
+
   const transitionToAddAppointment = useCallback(customer => {
     setCustomer(customer);
     setView('addAppointment');
   }, []);
+
   const transitionToDayView = useCallback(
     () => setView('dayView'),
     []
   );
-  const [customer, setCustomer] = useState();
+
+  const transitionToSearchCustomers = useCallback(
+    () => setView('searchCustomers'),
+    []
+  );
+
+  const searchActions = customer => (
+    <React.Fragment>
+      <button
+        role="button"
+        onClick={() => transitionToAddAppointment(customer)}>
+        Create appointment
+      </button>
+    </React.Fragment>
+  );
 
   switch (view) {
+    case 'searchCustomers':
+      return (
+        <CustomerSearch renderCustomerActions={searchActions} />
+      );
     case 'addCustomer':
       return <CustomerForm onSave={transitionToAddAppointment} />;
     case 'addAppointment':
@@ -41,6 +64,12 @@ export const App = () => {
               id="addCustomer"
               onClick={transitionToAddCustomer}>
               Add customer and appointment
+            </button>
+            <button
+              type="button"
+              id="searchCustomers"
+              onClick={transitionToSearchCustomers}>
+              Search customers
             </button>
           </div>
           <AppointmentsDayViewLoader />
