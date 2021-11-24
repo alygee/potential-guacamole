@@ -2,22 +2,29 @@ import React, { useEffect, useState, useCallback } from 'react';
 
 const CustomerRow = ({ customer, renderCustomerActions }) => (
   <tr>
-    <td>{customer.firstName}</td>
-    <td>{customer.lastName}</td>
-    <td>{customer.phoneNumber}</td>
-    <td>{renderCustomerActions(customer)}</td>
+    <td class="border px-4 py-2">{customer.firstName}</td>
+    <td class="border px-4 py-2">{customer.lastName}</td>
+    <td class="border px-4 py-2">{customer.phoneNumber}</td>
+    <td class="border px-4 py-2">
+      {renderCustomerActions(customer)}
+    </td>
   </tr>
 );
 
 const SearchButtons = ({ handleNext, handlePrevious }) => (
-  <div className="button-bar">
+  <div className="my-4 button-bar">
     <button
       role="button"
       id="previous-page"
-      onClick={handlePrevious}>
+      onClick={handlePrevious}
+      className="px-4 py-2 mr-4 text-blue-700 bg-transparent border border-blue-500 rounded hover:bg-blue-500 hover:text-white hover:border-transparent">
       Previous
     </button>
-    <button role="button" id="next-page" onClick={handleNext}>
+    <button
+      role="button"
+      id="next-page"
+      onClick={handleNext}
+      className="px-4 py-2 mr-4 text-blue-700 bg-transparent border border-blue-500 rounded hover:bg-blue-500 hover:text-white hover:border-transparent">
       Next
     </button>
   </div>
@@ -79,15 +86,20 @@ export const CustomerSearch = ({ renderCustomerActions }) => {
 
   return (
     <React.Fragment>
-      <input
-        placeholder="Enter filter text"
-        onChange={handleSearchTerm}
-      />
+      <div className="flex items-center py-2 border-b border-blue-500">
+        <input
+          className="w-full px-2 py-1 mr-3 leading-tight text-gray-700 bg-transparent border-none appearance-none focus:outline-none"
+          type="text"
+          placeholder="Enter filter text"
+          onChange={handleSearchTerm}
+        />
+      </div>
+
       <SearchButtons
         handleNext={handleNext}
         handlePrevious={handlePrevious}
       />
-      <table>
+      <table class="table-auto w-full">
         <thead>
           <tr>
             <th>First name</th>

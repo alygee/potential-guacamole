@@ -33,7 +33,8 @@ export const App = () => {
     <React.Fragment>
       <button
         role="button"
-        onClick={() => transitionToAddAppointment(customer)}>
+        onClick={() => transitionToAddAppointment(customer)}
+        className="px-4 py-2 text-blue-700 bg-transparent border border-blue-500 rounded hover:bg-blue-500 hover:text-white hover:border-transparent">
         Create appointment
       </button>
     </React.Fragment>
@@ -62,13 +63,15 @@ export const App = () => {
             <button
               type="button"
               id="addCustomer"
-              onClick={transitionToAddCustomer}>
+              onClick={transitionToAddCustomer}
+              className="px-4 py-2 mr-4 text-blue-700 bg-transparent border border-blue-500 rounded hover:bg-blue-500 hover:text-white hover:border-transparent">
               Add customer and appointment
             </button>
             <button
               type="button"
               id="searchCustomers"
-              onClick={transitionToSearchCustomers}>
+              onClick={transitionToSearchCustomers}
+              className="px-4 py-2 text-blue-700 bg-transparent border border-blue-500 rounded hover:bg-blue-500 hover:text-white hover:border-transparent">
               Search customers
             </button>
           </div>
