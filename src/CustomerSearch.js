@@ -2,10 +2,10 @@ import React, { useEffect, useState, useCallback } from 'react';
 
 const CustomerRow = ({ customer, renderCustomerActions }) => (
   <tr>
-    <td class="border px-4 py-2">{customer.firstName}</td>
-    <td class="border px-4 py-2">{customer.lastName}</td>
-    <td class="border px-4 py-2">{customer.phoneNumber}</td>
-    <td class="border px-4 py-2">
+    <td className="border px-4 py-2">{customer.firstName}</td>
+    <td className="border px-4 py-2">{customer.lastName}</td>
+    <td className="border px-4 py-2">{customer.phoneNumber}</td>
+    <td className="border px-4 py-2">
       {renderCustomerActions(customer)}
     </td>
   </tr>
@@ -99,7 +99,7 @@ export const CustomerSearch = ({ renderCustomerActions }) => {
         handleNext={handleNext}
         handlePrevious={handlePrevious}
       />
-      <table class="table-auto w-full">
+      <table className="table-auto w-full">
         <thead>
           <tr>
             <th>First name</th>
