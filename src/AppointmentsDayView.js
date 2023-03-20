@@ -7,7 +7,7 @@ export const Appointment = ({
   service,
   notes
 }) => (
-  <div className="px-20">
+  <div className="px-20" id="appointmentView">
     <h2 className="font-bold text-xl mb-6">
       Today's appointment at &nbsp;
       {appointmentTimeOfDay(startsAt)}

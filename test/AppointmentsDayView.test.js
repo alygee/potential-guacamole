@@ -4,28 +4,50 @@ import { createContainer } from './domManipulators';
 
 import {
   Appointment,
-  AppointmentsDayView
+  AppointmentsDayView,
 } from '../src/AppointmentsDayView';
+
+import {
+  initializeReactContainer,
+  render,
+  click,
+  element,
+  elements,
+  textOf,
+  typesOf,
+} from './domManipulators.js';
 
 let customer;
 
 describe('Appointment', () => {
-  let render, container;
+  const blankCustomer = {
+    firstname: '',
+    lastname: '',
+    phoneNumber: '',
+  };
 
   beforeEach(() => {
-    ({ render, container } = createContainer());
+    initializeReactContainer();
   });
+
+  const appointmentTable = () =>
+    element('#appointmentView > table');
+
+  it('renders a table', () => {
+    render(<Appointment customer={blankCustomer} />);
+    expect(appointmentTable()).not.toBeNull();
+  })
 
   it('renders the customer first name', () => {
     customer = { firstName: 'Ashley' };
     render(<Appointment customer={customer} />);
-    expect(container.textContent).toMatch('Ashley');
+    expect(appointmentTable()).toContainText('Ashley');
   });
 
   it('renders another customer first name', () => {
     customer = { firstName: 'Jordan' };
     render(<Appointment customer={customer} />);
-    expect(container.textContent).toMatch('Jordan');
+    expect(appointmentTable()).toContainText('Jordan');
   });
 });
 
@@ -40,12 +62,12 @@ describe('AppointmentsDayView', () => {
     appointments = [
       {
         startsAt: today.setHours(12, 0),
-        customer: { firstName: 'Ashley' }
+        customer: { firstName: 'Ashley' },
       },
       {
         startsAt: today.setHours(13, 0),
-        customer: { firstName: 'Jordan' }
-      }
+        customer: { firstName: 'Jordan' },
+      },
     ];
   });
 
