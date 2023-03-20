@@ -1,13 +1,55 @@
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import ReactTestUtils, { act } from 'react-dom/test-utils';
+import { createMemoryHistory } from 'history';
+import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
 
+export let history;
 export let container;
 let reactRoot;
 
 export const withEvent = (name, value) => ({
   target: { name, value },
 });
+
+export const initializeReactContainer = () => {
+  container = document.createElement('div');
+  document.body.replaceChildren(container);
+  reactRoot = createRoot(container);
+};
+
+export const render = (component) =>
+  act(() => reactRoot.render(component));
+
+export const renderAndWait = (component) =>
+  act(async () => reactRoot.render(component));
+
+export const renderWithRouter = (
+  component,
+  { location } = { location: '' }
+) => {
+  history = createMemoryHistory({
+    initialEntries: [location],
+  });
+
+  act(() => {
+    reactRoot.render(
+      <HistoryRouter history={history}>{component}</HistoryRouter>
+    );
+  });
+};
+
+export const element = (selector) =>
+  document.querySelector(selector);
+
+export const propsMatching = (mockComponent, matching) => {
+  const [k, v] = Object.entries(matching)[0];
+  const call = mockComponent.mock.calls.find(
+    ([props]) => props[k] === v
+  );
+  return call?.[0];
+};
 
 export const createContainer = () => {
   const container = document.createElement('div');
@@ -55,24 +97,4 @@ export const createContainer = () => {
     findOption,
     elements,
   };
-};
-
-export const initializeReactContainer = () => {
-  container = document.createElement('div');
-  document.body.replaceChildren(container);
-  reactRoot = createRoot(container);
-};
-
-export const render = (component) =>
-  act(() => reactRoot.render(component));
-
-export const element = (selector) =>
-  document.querySelector(selector);
-
-export const propsMatching = (mockComponent, matching) => {
-  const [k, v] = Object.entries(matching)[0];
-  const call = mockComponent.mock.calls.find(
-    ([props]) => props[k] === v
-  );
-  return call?.[0];
 };

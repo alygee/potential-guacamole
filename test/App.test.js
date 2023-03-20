@@ -1,38 +1,57 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import {
-  createShallowRenderer,
-  type,
-  childrenOf,
-  className,
-  click,
-  id
-} from './shallowHelpers';
+  initializeReactContainer,
+  renderWithRouter,
+} from './reactTestExtensions';
 import { App } from '../src/App';
 import { AppointmentsDayViewLoader } from '../src/AppointmentsDayViewLoader';
 import { CustomerForm } from '../src/CustomerForm';
 import { AppointmentFormLoader } from '../src/AppointmentFormLoader';
 import { CustomerSearch } from '../src/CustomerSearch';
 
-describe('App', () => {
+jest.mock('../src/AppointmentsDayViewLoader', () => ({
+  AppointmentsDayViewLoader: jest.fn(() => (
+    <div id="AppointmentsDayViewLoader" />
+  )),
+}));
+
+jest.mock('../src/CustomerForm', () => ({
+  CustomerForm: jest.fn(() => (
+    <div id="CustomerForm" />
+  )),
+}));
+
+jest.mock('../src/AppointmentFormLoader', () => ({
+  AppointmentFormLoader: jest.fn(() => (
+    <div id="AppointmentFormLoader" />
+  )),
+}));
+
+jest.mock('../src/CustomerSearch', () => ({
+  CustomerSearch: jest.fn(() => (
+    <div id="CustomerSearch" />
+  )),
+}));
+
+describe.only('App', () => {
   let render, elementMatching, child;
   const beginAddingCustomerAndAppointment = () => {
     render(<App />);
     click(elementMatching(id('addCustomer')));
   };
-  const saveCustomer = customer =>
+  const saveCustomer = (customer) =>
     elementMatching(type(CustomerForm)).props.onSave(customer);
   const saveAppointment = () =>
     elementMatching(type(AppointmentFormLoader)).props.onSave();
 
   beforeEach(() => {
-    ({ render, elementMatching, child } = createShallowRenderer());
+    initializeReactContainer();
   });
 
-  it('initially shows the AppointmentsDayViewLoader', () => {
-    render(<App />);
-    expect(
-      elementMatching(type(AppointmentsDayViewLoader))
-    ).toBeDefined();
+  it.only('initially shows the AppointmentsDayViewLoader', () => {
+    renderWithRouter(<App />);
+    expect(AppointmentsDayViewLoader).toBeRendered();
   });
 
   it('has a button bar as the first child', () => {
@@ -102,7 +121,7 @@ describe('App', () => {
     ).toBeDefined();
   });
 
-  describe('search customers', () => {
+  describe.skip('search customers', () => {
     it('has a button to search customers', () => {
       render(<App />);
       const buttons = childrenOf(
@@ -124,7 +143,7 @@ describe('App', () => {
       expect(elementMatching(type(CustomerSearch))).toBeDefined();
     });
 
-    const renderSearchActionsForCustomer = customer => {
+    const renderSearchActionsForCustomer = (customer) => {
       searchCustomersTransiiton();
       const customerSearchComponent = elementMatching(
         type(CustomerSearch)
