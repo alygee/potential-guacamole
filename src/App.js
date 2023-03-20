@@ -1,82 +1,83 @@
 import React, { useState, useCallback } from 'react';
-import ReactDOM from 'react-dom';
-import { CustomerForm } from './CustomerForm';
-import { AppointmentFormLoader } from './AppointmentFormLoader';
+import {
+  Link,
+  Route,
+  Routes,
+  useNavigate,
+} from 'react-router-dom';
 import { AppointmentsDayViewLoader } from './AppointmentsDayViewLoader';
-import { CustomerSearch } from './CustomerSearch';
+import { CustomerForm } from './CustomerForm';
+import { AppointmentFormRoute } from './AppointmentFormRoute';
+import { CustomerSearchRoute } from './CustomerSearchRoute';
+
+const blankCustomer = {
+  firstName: '',
+  lastName: '',
+  phoneNumber: '',
+};
+
+export const MainScreen = () => (
+  <>
+    <menu>
+      <li>
+        <Link to="/addCustomer" role="button">
+          Add customer and appointment
+        </Link>
+      </li>
+      <li>
+        <Link to="/searchCustomers" role="button">
+          Search customers
+        </Link>
+      </li>
+    </menu>
+    <AppointmentsDayViewLoader />
+  </>
+);
 
 export const App = () => {
-  const [view, setView] = useState('dayView');
-  const [customer, setCustomer] = useState();
+  const navigate = useNavigate();
 
-  const transitionToAddCustomer = useCallback(
-    () => setView('addCustomer'),
-    []
+  const transitionToAddAppointment = (customer) =>
+    navigate(`/addAppointment?customer=${customer.id}`);
+
+  const transitionToDayView = () => navigate('/');
+
+  const searchActions = (customer) => (
+    <Link
+      role="button"
+      to={`/addAppointment?customer=${customer.id}`}
+      className="px-4 py-2 text-blue-700 bg-transparent border border-blue-500 rounded hover:bg-blue-500 hover:text-white hover:border-transparent"
+    >
+      Create appointment
+    </Link>
   );
 
-  const transitionToAddAppointment = useCallback(customer => {
-    setCustomer(customer);
-    setView('addAppointment');
-  }, []);
-
-  const transitionToDayView = useCallback(
-    () => setView('dayView'),
-    []
+  return (
+    <Routes>
+      <Route
+        path="/addCustomer"
+        element={
+          <CustomerForm
+            original={blankCustomer}
+            onSave={transitionToAddAppointment}
+          />
+        }
+      />
+      <Route
+        path="/addAppointment"
+        element={
+          <AppointmentFormRoute onSave={transitionToDayView} />
+        }
+      />
+      <Route
+        path="/searchCustomers"
+        element={
+          <CustomerSearchRoute
+            renderCustomerActions={searchActions}
+          />
+        }
+      />
+      <Route path='/' element={<MainScreen />} />
+    </Routes>
   );
-
-  const transitionToSearchCustomers = useCallback(
-    () => setView('searchCustomers'),
-    []
-  );
-
-  const searchActions = customer => (
-    <React.Fragment>
-      <button
-        role="button"
-        onClick={() => transitionToAddAppointment(customer)}
-        className="px-4 py-2 text-blue-700 bg-transparent border border-blue-500 rounded hover:bg-blue-500 hover:text-white hover:border-transparent">
-        Create appointment
-      </button>
-    </React.Fragment>
-  );
-
-  switch (view) {
-    case 'searchCustomers':
-      return (
-        <CustomerSearch renderCustomerActions={searchActions} />
-      );
-    case 'addCustomer':
-      return <CustomerForm onSave={transitionToAddAppointment} />;
-    case 'addAppointment':
-      return (
-        <AppointmentFormLoader
-          customer={customer}
-          onSave={transitionToDayView}
-        />
-      );
-    case 'dayView':
-      <AppointmentsDayViewLoader />;
-    default:
-      return (
-        <React.Fragment>
-          <div className="button-bar">
-            <button
-              type="button"
-              id="addCustomer"
-              onClick={transitionToAddCustomer}
-              className="px-4 py-2 mr-4 text-blue-700 bg-transparent border border-blue-500 rounded hover:bg-blue-500 hover:text-white hover:border-transparent">
-              Add customer and appointment
-            </button>
-            <button
-              type="button"
-              id="searchCustomers"
-              onClick={transitionToSearchCustomers}
-              className="px-4 py-2 text-blue-700 bg-transparent border border-blue-500 rounded hover:bg-blue-500 hover:text-white hover:border-transparent">
-              Search customers
-            </button>
-          </div>
-          <AppointmentsDayViewLoader />
-        </React.Fragment>
-      );
-  }
 };

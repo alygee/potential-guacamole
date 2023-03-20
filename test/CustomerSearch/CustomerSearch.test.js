@@ -1,37 +1,47 @@
 import 'whatwg-fetch';
 import React from 'react';
-import { createContainer, withEvent } from '../domManipulators';
-import { CustomerSearch } from '../../src/CustomerSearch';
+import {
+  createContainer,
+  withEvent,
+} from '../reactTestExtensions.js';
+import { CustomerSearch } from '../../src/CustomerSearch/CustomerSearch';
 import { fetchResponseOk } from '../spyHelpers';
+import {
+  initializeReactContainer,
+  renderAndWait,
+  change,
+  element,
+  elements,
+  textOf,
+} from '../reactTestExtensions';
 
 describe('CustomerSearch', () => {
-  let renderAndWait,
-    elements,
-    element,
-    clickAndWait,
-    changeAndWait;
+  let clickAndWait, changeAndWait;
 
   beforeEach(() => {
-    ({
-      renderAndWait,
-      elements,
-      element,
-      clickAndWait,
-      changeAndWait,
-    } = createContainer());
+    ({ clickAndWait, changeAndWait } =
+      createContainer());
+    initializeReactContainer();
     jest
       .spyOn(window, 'fetch')
       .mockReturnValue(fetchResponseOk([]));
   });
 
   afterEach(() => {
-    window.fetch.mockRestore();
+    // window.fetch.mockRestore();
   });
 
+  const testProps = {
+    navigate: jest.fn(),
+    renderCustomerActions: jest.fn(() => {}),
+    searchTerm: '',
+    lastRowIds: [],
+  };
+
   it('renders a table with four headings', async () => {
-    await renderAndWait(<CustomerSearch />);
+    await renderAndWait(<CustomerSearch {...testProps} />);
     const headings = elements('table th');
-    expect(headings.map((h) => h.textContent)).toEqual([
+    expect(textOf(headings)).toEqual([
       'First name',
       'Last name',
       'Phone number',
@@ -231,13 +241,6 @@ describe('CustomerSearch', () => {
 
     expect(actionSpy).toHaveBeenCalledWith(oneCustomer[0]);
   });
-
-  const testProps = {
-    navigate: jest.fn(),
-    renderCustomerActions: jest.fn(() => {}),
-    searchTerm: "",
-    lastRowIds: [],
-  }
 
   it.skip('renders SearchButtons with props', async () => {
     global.fetch.mockResolvedValue(fetchResponseOk(tenCustomers));

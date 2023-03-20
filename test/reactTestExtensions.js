@@ -43,7 +43,48 @@ export const renderWithRouter = (
 export const element = (selector) =>
   document.querySelector(selector);
 
-export const propsMatching = (mockComponent, matching) => {
+export const elements = (selector) =>
+  Array.from(document.querySelectorAll(selector));
+
+export const typesOf = (elements) =>
+  elements.map((element) => element.type);
+
+export const textOf = (elements) =>
+  elements.map((element) => element.textContent);
+
+export const form = (id) => element("form");
+
+export const field = (fieldName) =>
+  form().elements[fieldName];
+
+export const submitButton = () =>
+  element("input[type=submit]");
+
+export const labelFor = (formElement) =>
+  element(`label[for=${formElement}]`);
+
+export const propsOf = (mockComponent) => {
+  const lastCall =
+    mockComponent.mock.calls[
+      mockComponent.mock.calls.length - 1
+    ];
+  return lastCall[0];
+};
+
+export const buttonWithLabel = (label) =>
+  elements("button").find(
+    ({ textContent }) => textContent === label
+  );
+
+export const linkFor = (href) =>
+  elements("a").find(
+    (el) => el.getAttribute("href") === href
+  );
+
+export const propsMatching = (
+  mockComponent,
+  matching
+) => {
   const [k, v] = Object.entries(matching)[0];
   const call = mockComponent.mock.calls.find(
     ([props]) => props[k] === v

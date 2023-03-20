@@ -2,13 +2,17 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import {
   initializeReactContainer,
+  container,
+  element,
   renderWithRouter,
 } from './reactTestExtensions';
 import { App } from '../src/App';
 import { AppointmentsDayViewLoader } from '../src/AppointmentsDayViewLoader';
 import { CustomerForm } from '../src/CustomerForm';
 import { AppointmentFormLoader } from '../src/AppointmentFormLoader';
-import { CustomerSearch } from '../src/CustomerSearch';
+import { CustomerSearch } from '../src/CustomerSearch/CustomerSearch';
+import { AppointmentFormRoute } from "../src/AppointmentFormRoute";
+import { CustomerSearchRoute } from "../src/CustomerSearchRoute";
 
 jest.mock('../src/AppointmentsDayViewLoader', () => ({
   AppointmentsDayViewLoader: jest.fn(() => (
@@ -17,9 +21,7 @@ jest.mock('../src/AppointmentsDayViewLoader', () => ({
 }));
 
 jest.mock('../src/CustomerForm', () => ({
-  CustomerForm: jest.fn(() => (
-    <div id="CustomerForm" />
-  )),
+  CustomerForm: jest.fn(() => <div id="CustomerForm" />),
 }));
 
 jest.mock('../src/AppointmentFormLoader', () => ({
@@ -28,36 +30,40 @@ jest.mock('../src/AppointmentFormLoader', () => ({
   )),
 }));
 
-jest.mock('../src/CustomerSearch', () => ({
-  CustomerSearch: jest.fn(() => (
-    <div id="CustomerSearch" />
-  )),
+jest.mock('../src/CustomerSearch/CustomerSearch', () => ({
+  CustomerSearch: jest.fn(() => <div id="CustomerSearch" />),
 }));
 
-describe.only('App', () => {
-  let render, elementMatching, child;
-  const beginAddingCustomerAndAppointment = () => {
-    render(<App />);
-    click(elementMatching(id('addCustomer')));
-  };
-  const saveCustomer = (customer) =>
-    elementMatching(type(CustomerForm)).props.onSave(customer);
-  const saveAppointment = () =>
-    elementMatching(type(AppointmentFormLoader)).props.onSave();
-
+describe('App', () => {
   beforeEach(() => {
     initializeReactContainer();
   });
 
-  it.only('initially shows the AppointmentsDayViewLoader', () => {
+  it('initially shows the AppointmentsDayViewLoader', () => {
     renderWithRouter(<App />);
     expect(AppointmentsDayViewLoader).toBeRendered();
   });
 
-  it('has a button bar as the first child', () => {
-    render(<App />);
-    expect(child(0).type).toEqual('div');
-    expect(child(0).props.className).toEqual('button-bar');
+  it('has a menu bar', () => {
+    renderWithRouter(<App />);
+    expect(element('menu')).not.toBeNull();
+  });
+
+  it('renders CustomerForm at the /addCustomer endpoint', () => {
+    renderWithRouter(<App />, { location: '/addCustomer', });
+    expect(CustomerForm).toBeRendered();
+  });
+
+  it('renders AppointmentFormRoute at the /addAppointment', () => {
+    renderWithRouter(<App />, { location: '/addAppointment?customer=123', });
+    expect(AppointmentFormRoute).toBeRendered();
+  });
+
+  it.only("renders CustomerSearchRoute at /searchCustomers", () => {
+    renderWithRouter(<App />, {
+      location: "/searchCustomers",
+    });
+    expect(CustomerSearchRoute).toBeRendered();
   });
 
   it('has a button to initiate add customer and appointment action', () => {
