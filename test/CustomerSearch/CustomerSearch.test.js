@@ -1,8 +1,8 @@
 import 'whatwg-fetch';
 import React from 'react';
-import { createContainer, withEvent } from './domManipulators';
-import { CustomerSearch } from '../src/CustomerSearch';
-import { fetchResponseOk } from './spyHelpers';
+import { createContainer, withEvent } from '../domManipulators';
+import { CustomerSearch } from '../../src/CustomerSearch';
+import { fetchResponseOk } from '../spyHelpers';
 
 describe('CustomerSearch', () => {
   let renderAndWait,
@@ -17,7 +17,7 @@ describe('CustomerSearch', () => {
       elements,
       element,
       clickAndWait,
-      changeAndWait
+      changeAndWait,
     } = createContainer());
     jest
       .spyOn(window, 'fetch')
@@ -31,11 +31,11 @@ describe('CustomerSearch', () => {
   it('renders a table with four headings', async () => {
     await renderAndWait(<CustomerSearch />);
     const headings = elements('table th');
-    expect(headings.map(h => h.textContent)).toEqual([
+    expect(headings.map((h) => h.textContent)).toEqual([
       'First name',
       'Last name',
       'Phone number',
-      'Actions'
+      'Actions',
     ]);
   });
 
@@ -44,12 +44,12 @@ describe('CustomerSearch', () => {
     expect(window.fetch).toHaveBeenCalledWith('/customers', {
       method: 'GET',
       credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     });
   });
 
   const oneCustomer = [
-    { id: 1, firstName: 'A', lastName: 'B', phoneNumber: '1' }
+    { id: 1, firstName: 'A', lastName: 'B', phoneNumber: '1' },
   ];
 
   it('renders all customer data i a table row', async () => {
@@ -63,12 +63,12 @@ describe('CustomerSearch', () => {
 
   const twoCustomers = [
     { id: 1, firstName: 'A', lastName: 'B', phoneNumber: '1' },
-    { id: 2, firstName: 'C', lastName: 'D', phoneNumber: '2' }
+    { id: 2, firstName: 'C', lastName: 'D', phoneNumber: '2' },
   ];
 
-  const tenCustomers = Array.from('0123456789', id => ({ id }));
-  const anotherTenCustomers = Array.from('ABCDEFGHIJ', id => ({
-    id
+  const tenCustomers = Array.from('0123456789', (id) => ({ id }));
+  const anotherTenCustomers = Array.from('ABCDEFGHIJ', (id) => ({
+    id,
   }));
 
   it('renders multiple customer rows', async () => {
@@ -230,5 +230,32 @@ describe('CustomerSearch', () => {
     );
 
     expect(actionSpy).toHaveBeenCalledWith(oneCustomer[0]);
+  });
+
+  const testProps = {
+    navigate: jest.fn(),
+    renderCustomerActions: jest.fn(() => {}),
+    searchTerm: "",
+    lastRowIds: [],
+  }
+
+  it.skip('renders SearchButtons with props', async () => {
+    global.fetch.mockResolvedValue(fetchResponseOk(tenCustomers));
+
+    await renderAndWait(
+      <CustomerSearch
+        {...testProps}
+        searchTerm="term"
+        limit={20}
+        lastRowIds={['123']}
+      />
+    );
+
+    expect(SearchButtons).toBeRenderedWithProps({
+      customers: tenCustomers,
+      searchTerm: 'term',
+      limit: 20,
+      lastRowIds: ['123'],
+    });
   });
 });
