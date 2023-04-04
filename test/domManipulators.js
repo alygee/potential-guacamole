@@ -1,4 +1,3 @@
-import React from 'react';
 import ReactDOM from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import ReactTestUtils, { act } from 'react-dom/test-utils';
@@ -43,48 +42,7 @@ export const renderWithRouter = (
 export const element = (selector) =>
   document.querySelector(selector);
 
-export const elements = (selector) =>
-  Array.from(document.querySelectorAll(selector));
-
-export const typesOf = (elements) =>
-  elements.map((element) => element.type);
-
-export const textOf = (elements) =>
-  elements.map((element) => element.textContent);
-
-export const form = (id) => element("form");
-
-export const field = (fieldName) =>
-  form().elements[fieldName];
-
-export const submitButton = () =>
-  element("input[type=submit]");
-
-export const labelFor = (formElement) =>
-  element(`label[for=${formElement}]`);
-
-export const propsOf = (mockComponent) => {
-  const lastCall =
-    mockComponent.mock.calls[
-      mockComponent.mock.calls.length - 1
-    ];
-  return lastCall[0];
-};
-
-export const buttonWithLabel = (label) =>
-  elements("button").find(
-    ({ textContent }) => textContent === label
-  );
-
-export const linkFor = (href) =>
-  elements("a").find(
-    (el) => el.getAttribute("href") === href
-  );
-
-export const propsMatching = (
-  mockComponent,
-  matching
-) => {
+export const propsMatching = (mockComponent, matching) => {
   const [k, v] = Object.entries(matching)[0];
   const call = mockComponent.mock.calls.find(
     ([props]) => props[k] === v
@@ -94,6 +52,8 @@ export const propsMatching = (
 
 export const createContainer = () => {
   const container = document.createElement('div');
+  document.body.replaceChildren(container);
+  const reactRoot = createRoot(container);
 
   const form = (id) => container.querySelector(`form[id="${id}"]`);
   const field = (formId, name) => form(formId).elements[name];
@@ -110,7 +70,10 @@ export const createContainer = () => {
   };
 
   const simulateEvent = (eventName) => (element, eventData) =>
-    ReactTestUtils.Simulate[eventName](element, eventData);
+    act(() => {
+      ReactTestUtils.Simulate[eventName](element, eventData);
+    });
+
   const simulateEventAndWait =
     (eventName) => async (element, eventData) =>
       await act(async () =>
@@ -126,10 +89,10 @@ export const createContainer = () => {
     changeAndWait: simulateEventAndWait('change'),
     render: (component) =>
       act(() => {
-        ReactDOM.render(component, container);
+        reactRoot.render(component);
       }),
     renderAndWait: async (component) =>
-      await act(async () => ReactDOM.render(component, container)),
+      await act(async () => reactRoot.render(component)),
     container,
     element,
     form,

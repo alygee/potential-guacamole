@@ -3,7 +3,7 @@ import 'whatwg-fetch';
 import {
   fetchResponseOk,
   fetchResponseError,
-  requestBodyOf
+  requestBodyOf,
 } from './spyHelpers';
 import { createContainer, withEvent } from './domManipulators';
 import { AppointmentForm } from '../src/AppointmentForm';
@@ -30,7 +30,7 @@ describe('AppointmentForm', () => {
       element,
       elements,
       submit,
-      change
+      change,
     } = createContainer());
     jest
       .spyOn(window, 'fetch')
@@ -59,7 +59,7 @@ describe('AppointmentForm', () => {
       expect.objectContaining({
         method: 'POST',
         credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       })
     );
   });
@@ -92,7 +92,7 @@ describe('AppointmentForm', () => {
 
     render(<AppointmentForm customer={customer} />);
     await submit(form('appointment'), {
-      preventDefault: preventDefaultSpy
+      preventDefault: preventDefaultSpy,
     });
 
     expect(preventDefaultSpy).toHaveBeenCalled();
@@ -127,7 +127,7 @@ describe('AppointmentForm', () => {
     await submit(form('appointment'));
 
     expect(requestBodyOf(window.fetch)).toMatchObject({
-      customer: customer.id
+      customer: customer.id,
     });
   });
 
@@ -147,7 +147,7 @@ describe('AppointmentForm', () => {
       await submit(form('appointment'));
 
       expect(requestBodyOf(window.fetch)).toMatchObject({
-        [fieldName]: 'newValue'
+        [fieldName]: 'newValue',
       });
     });
   };
@@ -164,7 +164,7 @@ describe('AppointmentForm', () => {
       await submit(form('appointment'));
 
       expect(requestBodyOf(window.fetch)).toMatchObject({
-        [fieldName]: 'value'
+        [fieldName]: 'value',
       });
     });
   };
@@ -198,7 +198,7 @@ describe('AppointmentForm', () => {
         field('appointment', 'service').childNodes
       );
       const renderedServices = optionNodes.map(
-        node => node.textContent
+        (node) => node.textContent
       );
       expect(renderedServices).toEqual(
         expect.arrayContaining(selectableServices)
@@ -239,17 +239,18 @@ describe('AppointmentForm', () => {
   });
 
   describe('time slot table', () => {
-    const timeSlotTableElement = selector =>
+    const timeSlotTableElement = (selector) =>
       element('table#time-slots').querySelector(selector);
-    const timeSlotTableElements = selector =>
+    const timeSlotTableElements = (selector) =>
       element('table#time-slots').querySelectorAll(selector);
-    const startsAtField = index =>
+
+    const startsAtField = (index) =>
       elements(`input[name="startsAt"]`)[index];
 
     const today = new Date();
     const availableTimeSlots = [
       { startsAt: today.setHours(9, 0, 0, 0) },
-      { startsAt: today.setHours(9, 30, 0, 0) }
+      { startsAt: today.setHours(9, 30, 0, 0) },
     ];
 
     it('renders a table for time slots', () => {
@@ -347,7 +348,7 @@ describe('AppointmentForm', () => {
       await submit(form('appointment'));
 
       expect(requestBodyOf(window.fetch)).toMatchObject({
-        startsAt: availableTimeSlots[0].startsAt
+        startsAt: availableTimeSlots[0].startsAt,
       });
     });
 
@@ -355,7 +356,7 @@ describe('AppointmentForm', () => {
       const today = new Date();
       const availableTimeSlots = [
         { startsAt: today.setHours(9, 0, 0, 0) },
-        { startsAt: today.setHours(9, 30, 0, 0) }
+        { startsAt: today.setHours(9, 30, 0, 0) },
       ];
       render(
         <AppointmentForm
@@ -369,13 +370,13 @@ describe('AppointmentForm', () => {
       change(startsAtField(1), {
         target: {
           value: availableTimeSlots[1].startsAt.toString(),
-          name: 'startsAt'
-        }
+          name: 'startsAt',
+        },
       });
       submit(form('appointment'));
 
       expect(requestBodyOf(window.fetch)).toMatchObject({
-        startsAt: availableTimeSlots[1].startsAt
+        startsAt: availableTimeSlots[1].startsAt,
       });
     });
   });
