@@ -1,42 +1,43 @@
-import { name, phone, lorem } from 'faker';
+import { faker } from "@faker-js/faker";
 
-const randomInt = range => Math.floor(Math.random() * range);
+const randomInt = (range) =>
+  Math.floor(Math.random() * range);
 
-Array.prototype.unique = function() {
-  return this.filter(function(value, index, self) {
+Array.prototype.unique = function () {
+  return this.filter(function (value, index, self) {
     return self.indexOf(value) === index;
   });
 };
 
-Array.prototype.pickRandom = function() {
+Array.prototype.pickRandom = function () {
   return this[randomInt(this.length)];
 };
 
 const today = new Date();
-const at = hours => today.setHours(hours, 0);
+const at = (hours) => today.setHours(hours, 0);
 
-const stylists = ['Ashley', 'Jo', 'Pat', 'Sam'];
+const stylists = ["Ashley", "Jo", "Pat", "Sam"];
 
 const services = [
-  'Cut',
-  'Blow-dry',
-  'Cut & color',
-  'Beard trim',
-  'Cut & beard trim',
-  'Extensions'
+  "Cut",
+  "Blow-dry",
+  "Cut & color",
+  "Beard trim",
+  "Cut & beard trim",
+  "Extensions",
 ];
 
 const generateFakeCustomer = () => ({
-  firstName: name.firstName(),
-  lastName: name.lastName(),
-  phoneNumber: phone.phoneNumberFormat(1)
+  firstName: faker.name.firstName(),
+  lastName: faker.name.lastName(),
+  phoneNumber: faker.phone.number("(###) ###-####"),
 });
 
 const generateFakeAppointment = () => ({
   customer: generateFakeCustomer(),
   stylist: stylists.pickRandom(),
   service: services.pickRandom(),
-  notes: lorem.paragraph()
+  notes: faker.lorem.paragraph(),
 });
 
 export const sampleAppointments = [
@@ -48,7 +49,7 @@ export const sampleAppointments = [
   { startsAt: at(14), ...generateFakeAppointment() },
   { startsAt: at(15), ...generateFakeAppointment() },
   { startsAt: at(16), ...generateFakeAppointment() },
-  { startsAt: at(17), ...generateFakeAppointment() }
+  { startsAt: at(17), ...generateFakeAppointment() },
 ];
 
 const pickMany = (items, number) =>
@@ -59,13 +60,18 @@ const pickMany = (items, number) =>
 const buildTimeSlots = () => {
   const today = new Date();
   const startTime = today.setHours(9, 0, 0, 0);
-  const times = [...Array(7).keys()].map(day => {
+  const times = [...Array(7).keys()].map((day) => {
     const daysToAdd = day * 24 * 60 * 60 * 1000;
-    return [...Array(20).keys()].map(halfHour => {
-      const halfHoursToAdd = halfHour * 30 * 60 * 1000;
+    return [...Array(20).keys()].map((halfHour) => {
+      const halfHoursToAdd =
+        halfHour * 30 * 60 * 1000;
       return {
-        startsAt: startTime + daysToAdd + halfHoursToAdd,
-        stylists: pickMany(stylists, randomInt(stylists.length))
+        startsAt:
+          startTime + daysToAdd + halfHoursToAdd,
+        stylists: pickMany(
+          stylists,
+          randomInt(stylists.length)
+        ),
       };
     });
   });

@@ -1,11 +1,11 @@
-import React from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { AppointmentFormLoader } from './AppointmentFormLoader';
+import React from "react";
+import { useSearchParams } from "react-router-dom";
+import { AppointmentFormLoader } from "./AppointmentFormLoader";
 
 const blankAppointment = {
-  service: '',
-  stylist: '',
-  starsAt: null,
+  service: "",
+  stylist: "",
+  startsAt: null,
 };
 
 export const AppointmentFormRoute = (props) => {
@@ -16,7 +16,7 @@ export const AppointmentFormRoute = (props) => {
       {...props}
       original={{
         ...blankAppointment,
-        customer: params.get('customer'),
+        customer: params.get("customer"),
       }}
     />
   );

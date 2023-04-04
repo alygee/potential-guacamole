@@ -2,11 +2,16 @@ type Query {
   customer(id: ID!): Customer
   customers: [Customer]
   availableTimeSlots: [Appointment]
-  appointments(from: String, to: String): [Appointment]
+  appointments(
+    from: String
+    to: String
+  ): [Appointment]
 }
 
 type Mutation {
-  addAppointment(appointment: AppointmentInput): Appointment
+  addAppointment(
+    appointment: AppointmentInput
+  ): Appointment
   addCustomer(customer: CustomerInput): Customer
 }
 

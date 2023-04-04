@@ -1,12 +1,11 @@
 import React from "react";
 import {
   initializeReactContainer,
-  container,
   render,
   element,
 } from "../reactTestExtensions";
 import { Link } from "react-router-dom";
-import { ToggleRouterButton } from "../../src/CustomerSearch/ToggleRouterButton";
+import { RouterButton } from "../../src/CustomerSearch/RouterButton";
 
 jest.mock("react-router-dom", () => ({
   Link: jest.fn(({ children }) => (
@@ -14,7 +13,7 @@ jest.mock("react-router-dom", () => ({
   )),
 }));
 
-describe("ToggleRouterButton", () => {
+describe("RouterButton", () => {
   const queryParams = { a: "123", b: "234" };
 
   beforeEach(() => {
@@ -23,10 +22,7 @@ describe("ToggleRouterButton", () => {
 
   it("renders a Link", () => {
     render(
-      <ToggleRouterButton queryParams={queryParams} />
-    );
-    expect(container.firstChild).toEqual(
-      element("#Link")
+      <RouterButton queryParams={queryParams} />
     );
     expect(Link).toBeRenderedWithProps({
       className: "",
@@ -39,25 +35,25 @@ describe("ToggleRouterButton", () => {
 
   it("renders children", () => {
     render(
-      <ToggleRouterButton queryParams={queryParams}>
+      <RouterButton queryParams={queryParams}>
         child text
-      </ToggleRouterButton>
+      </RouterButton>
     );
     expect(element("#Link")).toContainText(
       "child text"
     );
   });
 
-  it("adds toggled class if toggled prop is true", () => {
+  it("adds disabled class if disabled prop is true", () => {
     render(
-      <ToggleRouterButton
+      <RouterButton
+        disabled={true}
         queryParams={queryParams}
-        toggled={true}
       />
     );
     expect(Link).toBeRenderedWithProps(
       expect.objectContaining({
-        className: "toggled",
+        className: "disabled",
       })
     );
   });

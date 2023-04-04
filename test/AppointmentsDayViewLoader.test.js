@@ -1,76 +1,105 @@
-import React from 'react';
-import 'whatwg-fetch';
-import { createContainer } from './domManipulators';
-import { fetchResponseOk } from './spyHelpers';
-import { AppointmentsDayViewLoader } from '../src/AppointmentsDayViewLoader';
-import * as AppointmentsDayViewExports from '../src/AppointmentsDayView';
+import React from "react";
+import {
+  initializeReactContainer,
+  renderAndWait,
+  element,
+} from "./reactTestExtensions";
+import { fetchResponseOk } from "./builders/fetch";
+import { AppointmentsDayViewLoader } from "../src/AppointmentsDayViewLoader";
+import { AppointmentsDayView } from "../src/AppointmentsDayView";
+import {
+  today,
+  todayAt,
+  tomorrow,
+  tomorrowAt,
+} from "./builders/time";
 
-describe('AppointmentsDayViewLoader', () => {
-  let renderAndWait, container;
+jest.mock("../src/AppointmentsDayView", () => ({
+  AppointmentsDayView: jest.fn(() => (
+    <div id="AppointmentsDayView" />
+  )),
+}));
 
-  const today = new Date();
+describe("AppointmentsDayViewLoader", () => {
   const appointments = [
-    { startsAt: today.setHours(9, 0, 0, 0) },
-    { startsAt: today.setHours(10, 0, 0, 0) }
+    { startsAt: todayAt(9) },
+    { startsAt: todayAt(10) },
   ];
 
   beforeEach(() => {
-    ({ renderAndWait, container } = createContainer());
+    initializeReactContainer();
     jest
-      .spyOn(window, 'fetch')
-      .mockReturnValue(fetchResponseOk(appointments));
-    jest
-      .spyOn(AppointmentsDayViewExports, 'AppointmentsDayView')
-      .mockReturnValue(null);
+      .spyOn(global, "fetch")
+      .mockResolvedValue(
+        fetchResponseOk(appointments)
+      );
   });
 
-  afterEach(() => {
-    window.fetch.mockRestore();
-    AppointmentsDayViewExports.AppointmentsDayView.mockRestore();
+  it("renders an AppointmentsDayView", async () => {
+    await renderAndWait(
+      <AppointmentsDayViewLoader />
+    );
+    expect(
+      element("#AppointmentsDayView")
+    ).not.toBeNull();
   });
 
-  it('fetches appointments happening today when component is mounted', async () => {
-    const from = today.setHours(0, 0, 0, 0);
-    const to = today.setHours(23, 59, 59, 999);
+  it("initially passes empty array of appointments to AppointmentsDayView", async () => {
+    await renderAndWait(
+      <AppointmentsDayViewLoader />
+    );
+
+    expect(
+      AppointmentsDayView
+    ).toBeFirstRenderedWithProps({
+      appointments: [],
+    });
+  });
+
+  it("fetches data when component is mounted", async () => {
+    const from = todayAt(0);
+    const to = todayAt(23, 59, 59, 999);
 
     await renderAndWait(
       <AppointmentsDayViewLoader today={today} />
     );
 
-    expect(window.fetch).toHaveBeenCalledWith(
+    expect(global.fetch).toBeCalledWith(
       `/appointments/${from}-${to}`,
-      expect.objectContaining({
-        method: 'GET',
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' }
-      })
+      {
+        method: "GET",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
   });
 
-  it('initially passes no data to AppointmentsDayView', async () => {
-    await renderAndWait(<AppointmentsDayViewLoader />);
-
+  it("renders an AppointmentsDayView", async () => {
+    await renderAndWait(
+      <AppointmentsDayViewLoader />
+    );
     expect(
-      AppointmentsDayViewExports.AppointmentsDayView
-    ).toHaveBeenCalledWith(
-      { appointments: [] },
-      expect.anything()
+      element("#AppointmentsDayView")
+    ).not.toBeNull();
+  });
+
+  it("passes fetched appointments to AppointmentsDayView once they have loaded", async () => {
+    await renderAndWait(
+      <AppointmentsDayViewLoader />
+    );
+
+    expect(AppointmentsDayView).toBeRenderedWithProps(
+      {
+        appointments,
+      }
     );
   });
 
-  it('displays time slots that are fetched on mount', async () => {
-    await renderAndWait(<AppointmentsDayViewLoader />);
-
-    expect(
-      AppointmentsDayViewExports.AppointmentsDayView
-    ).toHaveBeenCalledWith({ appointments }, expect.anything());
-  });
-
-  it('re-requests appointment when today prop changes', async () => {
-    const tomorrow = new Date(today);
-    tomorrow.setHours(24);
-    const from = tomorrow.setHours(0, 0, 0, 0);
-    const to = tomorrow.setHours(23, 59, 59, 999);
+  it("re-requests appointment when today prop changes", async () => {
+    const from = tomorrowAt(0);
+    const to = tomorrowAt(23, 59, 59, 999);
 
     await renderAndWait(
       <AppointmentsDayViewLoader today={today} />
@@ -79,15 +108,9 @@ describe('AppointmentsDayViewLoader', () => {
       <AppointmentsDayViewLoader today={tomorrow} />
     );
 
-    expect(window.fetch).toHaveBeenCalledWith(
+    expect(global.fetch).toHaveBeenLastCalledWith(
       `/appointments/${from}-${to}`,
       expect.anything()
     );
-  });
-
-  it('calls window.fetch just once', async () => {
-    await renderAndWait(<AppointmentsDayViewLoader />);
-    await renderAndWait(<AppointmentsDayViewLoader />);
-    expect(window.fetch.mock.calls.length).toBe(1);
   });
 });

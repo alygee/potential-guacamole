@@ -2,13 +2,13 @@ import React from "react";
 import { objectToQueryString } from "../objectToQueryString";
 import { Link } from "react-router-dom";
 
-export const ToggleRouterButton = ({
+export const RouterButton = ({
   queryParams,
   children,
-  toggled,
+  disabled,
 }) => (
   <Link
-    className={toggled ? "toggled" : ""}
+    className={disabled ? "disabled" : ""}
     role="button"
     to={{
       search: objectToQueryString(queryParams),

@@ -1,105 +1,73 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from "react";
+import { objectToQueryString } from "../objectToQueryString";
+import { SearchButtons } from "./SearchButtons";
 
-const CustomerRow = ({ customer, renderCustomerActions }) => (
+const CustomerRow = ({
+  customer,
+  renderCustomerActions,
+}) => (
   <tr>
-    <td className="border px-4 py-2">{customer.firstName}</td>
-    <td className="border px-4 py-2">{customer.lastName}</td>
-    <td className="border px-4 py-2">{customer.phoneNumber}</td>
-    <td className="border px-4 py-2">
-      {renderCustomerActions(customer)}
-    </td>
+    <td>{customer.firstName}</td>
+    <td>{customer.lastName}</td>
+    <td>{customer.phoneNumber}</td>
+    <td>{renderCustomerActions(customer)}</td>
   </tr>
 );
 
-const SearchButtons = ({ handleNext, handlePrevious }) => (
-  <div className="my-4 button-bar">
-    <button
-      role="button"
-      id="previous-page"
-      onClick={handlePrevious}
-      className="px-4 py-2 mr-4 text-blue-700 bg-transparent border border-blue-500 rounded hover:bg-blue-500 hover:text-white hover:border-transparent">
-      Previous
-    </button>
-    <button
-      role="button"
-      id="next-page"
-      onClick={handleNext}
-      className="px-4 py-2 mr-4 text-blue-700 bg-transparent border border-blue-500 rounded hover:bg-blue-500 hover:text-white hover:border-transparent">
-      Next
-    </button>
-  </div>
-);
-
-export const CustomerSearch = ({ renderCustomerActions }) => {
+export const CustomerSearch = ({
+  renderCustomerActions,
+  lastRowIds,
+  searchTerm,
+  limit,
+  navigate,
+}) => {
   const [customers, setCustomers] = useState([]);
-  const [lastRowIds, setLastRowIds] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
 
-  const handleSearchTerm = ({ target: { value } }) =>
-    setSearchTerm(value);
-
-  const handleNext = useCallback(async () => {
-    const currentLastRowId = customers[customers.length - 1].id;
-    setLastRowIds([...lastRowIds, currentLastRowId]);
-  }, [customers, lastRowIds]);
-
-  const handlePrevious = useCallback(() => {
-    setLastRowIds(lastRowIds.slice(0, -1));
-  }, [lastRowIds]);
-
-  const searchParams = (after, searchTerm) => {
-    let pairs = [];
-    if (after) {
-      pairs.push(`after=${after}`);
-    }
-    if (searchTerm) {
-      pairs.push(`searchTerm=${searchTerm}`);
-    }
-    if (pairs.length > 0) {
-      return `?${pairs.join('&')}`;
-    }
-    return '';
+  const handleSearchTextChanged = ({
+    target: { value },
+  }) => {
+    const params = { limit, searchTerm: value };
+    navigate(objectToQueryString(params));
   };
 
   useEffect(() => {
     const fetchData = async () => {
-      let after;
+      const after = lastRowIds[lastRowIds.length - 1];
+      const queryString = objectToQueryString({
+        after,
+        searchTerm,
+        limit: limit === 10 ? "" : limit,
+      });
 
-      if (lastRowIds.length > 0) {
-        after = lastRowIds[lastRowIds.length - 1];
-      }
-      const queryString = searchParams(after, searchTerm);
-
-      const result = await window.fetch(
+      const result = await global.fetch(
         `/customers${queryString}`,
         {
-          method: 'GET',
-          credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json' }
+          method: "GET",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
       setCustomers(await result.json());
     };
-
     fetchData();
-  }, [lastRowIds, searchTerm]);
+  }, [lastRowIds, searchTerm, limit]);
 
   return (
-    <React.Fragment>
-      <div className="flex items-center py-2 border-b border-blue-500">
-        <input
-          className="w-full px-2 py-1 mr-3 leading-tight text-gray-700 bg-transparent border-none appearance-none focus:outline-none"
-          type="text"
-          placeholder="Enter filter text"
-          onChange={handleSearchTerm}
-        />
-      </div>
-
-      <SearchButtons
-        handleNext={handleNext}
-        handlePrevious={handlePrevious}
+    <>
+      <input
+        value={searchTerm}
+        onChange={handleSearchTextChanged}
+        placeholder="Enter filter text"
       />
-      <table className="table-auto w-full">
+      <SearchButtons
+        customers={customers}
+        searchTerm={searchTerm}
+        limit={limit}
+        lastRowIds={lastRowIds}
+      />
+      <table>
         <thead>
           <tr>
             <th>First name</th>
@@ -109,19 +77,22 @@ export const CustomerSearch = ({ renderCustomerActions }) => {
           </tr>
         </thead>
         <tbody>
-          {customers.map(customer => (
+          {customers.map((customer) => (
             <CustomerRow
               customer={customer}
               key={customer.id}
-              renderCustomerActions={renderCustomerActions}
+              renderCustomerActions={
+                renderCustomerActions
+              }
             />
           ))}
         </tbody>
       </table>
-    </React.Fragment>
+    </>
   );
 };
 
 CustomerSearch.defaultProps = {
-  renderCustomerActions: () => {}
+  lastRowIds: [],
+  searchTerm: "",
 };
