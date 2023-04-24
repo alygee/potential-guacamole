@@ -29,4 +29,61 @@ describe('addCustomer', () => {
       .toDispatchAnAction()
       .matching({ type: 'ADD_CUSTOMER_SUBMITTING' });
   });
+
+  it('calls fetch with correct configuration', async () => {
+    const inputCustomer = { firstName: 'Ashley' };
+    store.dispatch(addCustomerRequest(inputCustomer));
+
+    expect(global.fetch).toBeCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(inputCustomer),
+      })
+    );
+  });
+
+  it('dispatches ADD_CUSTOMER_SUCCESSFUL on success', () => {
+    store.dispatch(addCustomerRequest());
+
+    return expectRedux(store).toDispatchAnAction().matching({
+      type: 'ADD_CUSTOMER_SUCCESSFUL',
+      customer,
+    });
+  });
+
+  it('navigates to /addAppointment on success', () => {
+    store.dispatch(addCustomerRequest());
+    expect(appHistory.location.pathname).toEqual(
+      '/addAppointment'
+    );
+    expect(appHistory.location.search).toEqual('?customer=123');
+  });
+
+  it('dispatches ADD_CUSTOMER_FAILED on non-specific error', () => {
+    global.fetch.mockReturnValue(fetchResponseError());
+    store.dispatch(addCustomerRequest());
+
+    return expectRedux(store)
+      .toDispatchAnAction()
+      .matching({ type: 'ADD_CUSTOMER_FAILED' });
+  });
+
+  it('dispatches ADD_CUSTOMER_VALIDATION_FAILED if validation errors were returned', () => {
+    const errors = { field: 'field', description: 'error text' };
+    global.fetch.mockReturnValue(
+      fetchResponseError(422, { errors })
+    );
+
+    store.dispatch(addCustomerRequest());
+
+    return expectRedux(store).toDispatchAnAction().matching({
+      type: 'ADD_CUSTOMER_VALIDATION_FAILED',
+      validationErrors: errors,
+    });
+  });
 });
